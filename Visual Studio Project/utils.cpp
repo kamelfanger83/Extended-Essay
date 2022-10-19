@@ -1,6 +1,7 @@
 #include "utils.h"
 
 #include <utility>
+#include <cmath>
 
 
 float clamp(float x, float min, float max) {

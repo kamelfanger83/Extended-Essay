@@ -14,8 +14,9 @@
 
 #include "animals.h"
 #include "utils.h"
+#include <cmath>
 
-using namespace constant;
+
 
 
 // Vertex Shader for animals source code
@@ -109,7 +110,7 @@ int main(){
 
 	// Initialize GLFW
 	glfwInit();
-
+	consts::init();
 	// Tell GLFW what version of OpenGL we are using 
 	// In this case we are using OpenGL 3.3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -240,10 +241,10 @@ int main(){
 
 		//SIMULATE
 
-		if (simulating) {
-			frame_steps += sim_step_per_frame;
-			while (sim_steps < frame_steps) {
-				sim_steps += 1;
+		if (consts::simulating) {
+			consts::frame_steps += consts::sim_step_per_frame;
+			while (consts::sim_steps < consts::frame_steps) {
+				consts::sim_steps += 1;
 				for (std::shared_ptr<predator> simulater : pred_vec) {
 					simulater->step(prey_vec, pred_vec);
 				}
@@ -258,7 +259,7 @@ int main(){
 		
 		drawBG(shaderProgramBG, out_color);
 
-		if (simulating) { // draw out predators and prey if simulation is running
+		if (consts::simulating) { // draw out predators and prey if simulation is running
 
 			// generate vertex array for prey
 			int prey_corn = 8; // corners prey body should have
@@ -266,8 +267,8 @@ int main(){
 			auto cur_prey = prey_vec.begin();
 			for (int oct = 0; oct < prey_vec.size(); oct++){ // generatation of vertices: iterate through prey and for each draw polygon centered at x,y
 				for (int i = 0; i < prey_corn; i++){
-					prey_vertices[oct * 2 * prey_corn + i * 2] = (*cur_prey)->pos.first + prey_size * cos(2 * PI / prey_corn * i);
-					prey_vertices[oct * 2 * prey_corn + i * 2 + 1] = (*cur_prey)->pos.second + prey_size * sin(2 * PI / prey_corn * i);
+					prey_vertices[oct * 2 * prey_corn + i * 2] = (*cur_prey)->pos.first + consts::prey_size * cos(2 * PI / prey_corn * i);
+					prey_vertices[oct * 2 * prey_corn + i * 2 + 1] = (*cur_prey)->pos.second + consts::prey_size * sin(2 * PI / prey_corn * i);
 				}
 				cur_prey++;
 			}
@@ -288,8 +289,8 @@ int main(){
 			auto cur_pred = pred_vec.begin();
 			for (int hex = 0; hex < pred_vec.size(); hex++) {
 				for (int i = 0; i < pred_corn; i++) {
-					pred_vertices[hex * 2 * pred_corn + i * 2] = (*cur_pred)->pos.first + pred_size * cos(2 * PI / pred_corn * i);
-					pred_vertices[hex * 2 * pred_corn + i * 2 + 1] = (*cur_pred)->pos.second + pred_size * sin(2 * PI / pred_corn * i);
+					pred_vertices[hex * 2 * pred_corn + i * 2] = (*cur_pred)->pos.first + consts::pred_size * cos(2 * PI / pred_corn * i);
+					pred_vertices[hex * 2 * pred_corn + i * 2 + 1] = (*cur_pred)->pos.second + consts::pred_size * sin(2 * PI / pred_corn * i);
 				}
 				cur_pred++;
 			}
@@ -384,8 +385,8 @@ int main(){
 		ImGui::ColorEdit4("Border color", out_color);
 		ImGui::ColorEdit4("Background color", bg_color);
 
-		ImGui::SliderFloat("Prey size", &prey_size, 0.0f, 0.1f);
-		ImGui::SliderFloat("Predator size", &pred_size, 0.0f, 0.1f);
+		ImGui::SliderFloat("Prey size", &consts::prey_size, 0.0f, 0.1f);
+		ImGui::SliderFloat("Predator size", &consts::pred_size, 0.0f, 0.1f);
 
 		ImGui::Text("Hello there adventurer!");
 		// Checkbox that appears in the window
@@ -395,34 +396,34 @@ int main(){
 
 		// Pre-Simulation menu
 		ImGui::Begin("Simulation options");
-		ImGui::SliderInt("Initial prey", &init_prey, 0, 100);
-		ImGui::SliderInt("Initial predators", &init_pred, 0, 100);
+		ImGui::SliderInt("Initial prey", &consts::init_prey, 0, 100);
+		ImGui::SliderInt("Initial predators", &consts::init_pred, 0, 100);
 		if (ImGui::Button("Start Simulation")) { 
 
 			// generate fresh prey and predators
 			prey_vec.clear();
 			pred_vec.clear();
-			for (int prey_gen = 0; prey_gen < init_prey; prey_gen++) prey_vec.insert(prey_vec.end(), std::shared_ptr<prey> (new prey()));
-			for (int pred_gen = 0; pred_gen < init_pred; pred_gen++) pred_vec.insert(pred_vec.end(), std::shared_ptr<predator>(new predator()));
+			for (int prey_gen = 0; prey_gen < consts::init_prey; prey_gen++) prey_vec.insert(prey_vec.end(), std::shared_ptr<prey> (new prey()));
+			for (int pred_gen = 0; pred_gen < consts::init_pred; pred_gen++) pred_vec.insert(pred_vec.end(), std::shared_ptr<predator>(new predator()));
 
-			simulating = true;
-			sim_steps = 0;
-			frame_steps = 0;
+			consts::simulating = true;
+			consts::sim_steps = 0;
+			consts::frame_steps = 0;
 		}
 
-		ImGui::SliderFloat("Predator speed", &pred_speed, 0.0f, 1.0f);
-		ImGui::SliderFloat("Predator vision range", &pred_see_range, 0.0f, 1.0f);
+		ImGui::SliderFloat("Predator speed", &consts::pred_speed, 0.0f, 1.0f);
+		ImGui::SliderFloat("Predator vision range", &consts::pred_see_range, 0.0f, 1.0f);
 
-		ImGui::SliderFloat("Prey speed", &prey_speed, 0.0f, 1.0f);
-		ImGui::SliderFloat("Prey vision range", &prey_see_range, 0.0f, 1.0f);
+		ImGui::SliderFloat("Prey speed", &consts::prey_speed, 0.0f, 1.0f);
+		ImGui::SliderFloat("Prey vision range", &consts::prey_see_range, 0.0f, 1.0f);
 
-		ImGui::SliderFloat("Predator idle speed %", &idle_slow, 0.0f, 1.0f);
-		ImGui::SliderFloat("Predator idle direction change", &idle_dir_c, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
+		ImGui::SliderFloat("Predator idle speed %", &consts::idle_slow, 0.0f, 1.0f);
+		ImGui::SliderFloat("Predator idle direction change", &consts::idle_dir_c, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
 
-		float o_sim_step_per_frame = sim_step_per_frame;
-		ImGui::SliderFloat("Simulation steps per frame", &sim_step_per_frame, 0.0f, 500.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
-		if (o_sim_step_per_frame != sim_step_per_frame) {
-			sim_steps = 0; frame_steps = 0;
+		float o_sim_step_per_frame = consts::sim_step_per_frame;
+		ImGui::SliderFloat("Simulation steps per frame", &consts::sim_step_per_frame, 0.0f, 500.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
+		if (o_sim_step_per_frame != consts::sim_step_per_frame) {
+			consts::sim_steps = 0; consts::frame_steps = 0;
 		}
 
 		ImGui::End();
