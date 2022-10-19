@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.20)
 project(Extended_Essay)
 
 set(CMAKE_CXX_STANDARD 14)
@@ -40,5 +40,12 @@ add_executable(Extended_Essay
         "Visual Studio Project/Main.cpp"
         "Visual Studio Project/utils.cpp"
         "Visual Studio Project/utils.h")
-target_link_libraries(Extended_Essay "Visual Studio Project/Libraries/lib/glfw3.lib")
 
+add_library(glfw STATIC IMPORTED)
+
+set_target_properties(glfw PROPERTIES
+        IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/Visual Studio Project/Libraries/lib/glfw3.lib"
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/Visual Studio Project/Libraries/include/GLFW"
+        )
+
+target_link_libraries(Extended_Essay glfw)

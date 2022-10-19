@@ -106,4 +106,5 @@ bool predator::step (std::list<std::shared_ptr<prey>>& prey_vec, std::list<std::
 			phi_idle = (float)rand() / RAND_MAX * 2 * PI;
 		}
 	}
+    return false;
 }
