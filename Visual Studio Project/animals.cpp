@@ -7,7 +7,6 @@
 
 #include <iostream>
 
-
 prey::prey() { // generate prey evenly within game circle
 	float r = std::max((float)rand() / RAND_MAX, (float)rand() / RAND_MAX); // get PDF needed to distribute point evenly in circle
 	float phi = (float)rand() / RAND_MAX * 2 * PI;

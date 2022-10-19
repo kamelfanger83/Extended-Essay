@@ -16,7 +16,7 @@
 #include "utils.h"
 #include <cmath>
 
-
+#include "constants.h"
 
 
 // Vertex Shader for animals source code
