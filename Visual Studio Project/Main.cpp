@@ -9,12 +9,13 @@
 #include <vector>
 #include <memory>
 #include <list>
+#include <functional>
+#include <cmath>
+
 
 #include "state.h"
-
 #include "animals.h"
 #include "utils.h"
-#include <cmath>
 
 
 // Vertex Shader for animals source code
@@ -245,11 +246,24 @@ int main() {
 	state.idle_dir_c = 0.05;
 	state.energy_on = 5;
 	state.energy_mov = 0.01;
+	state.terretorial_range = 0.1;
+
+	// track constants
+	state.sample_interval = 100;
+	state.tick = 0;
+	state.prey_eaten = 0;
 
 	sendUniform();
 
 	std::list<std::shared_ptr<prey>> prey_vec;
 	std::list<std::shared_ptr<predator>> pred_vec;
+
+	std::vector <std::function<sampled_attribute()>> attributes;
+	attributes.push_back([&]() {return sampled_attribute("predation rate", (float)state.prey_eaten / prey_vec.size()); });
+	attributes.push_back([&]() {return sampled_attribute("prey population size", prey_vec.size()); });
+	attributes.push_back([&]() {return sampled_attribute("predator population size", pred_vec.size()); });
+
+	std::vector<std::vector<sampled_attribute>> samples;
 
 	// Main while loop
 	while (!glfwWindowShouldClose(window)) {
@@ -264,15 +278,29 @@ int main() {
 		if (state.simulating) {
 			state.frame_steps += state.sim_step_per_frame;
 			while (state.sim_steps < state.frame_steps) {
-				state.sim_steps += 1;
+				state.sim_steps += 1;	
 				for (auto simulater = pred_vec.begin(); simulater != pred_vec.end(); simulater++) {
-					if ((*simulater)->step(prey_vec, pred_vec, state)) { // step returns true if predator dies
+					if ((*simulater)->step(prey_vec, pred_vec, simulater, state)) { // step returns true if predator dies
 						pred_vec.erase(simulater);
 					}
 				}
 
 				for (std::shared_ptr<prey> simulater : prey_vec) {
 					simulater->step(pred_vec, state);
+				}
+
+				// increase tick every simulation step
+				state.tick++;
+				if (state.tick == state.sample_interval) { // it is time to sample again
+					std::vector<sampled_attribute> this_sample;
+				
+					for (auto sampler : attributes) this_sample.push_back(sampler());
+
+					samples.push_back(this_sample);
+
+					// reset for next interval
+					state.tick = 0;
+					state.prey_eaten = 0;
 				}
 			}
 		}
@@ -416,7 +444,7 @@ int main() {
 		// Ends the window
 		ImGui::End();
 
-		// Pre-Simulation menu
+		// Simulation menu
 		ImGui::Begin("Simulation options");
 		ImGui::SliderInt("Initial prey", &state.init_prey, 0, 100);
 		ImGui::SliderInt("Initial predators", &state.init_pred, 0, 100);
@@ -426,21 +454,37 @@ int main() {
 			prey_vec.clear();
 			pred_vec.clear();
 			for (int prey_gen = 0; prey_gen < state.init_prey; prey_gen++) prey_vec.insert(prey_vec.end(), std::shared_ptr<prey>(new prey()));
-			for (int pred_gen = 0; pred_gen < state.init_pred; pred_gen++) pred_vec.insert(pred_vec.end(), std::shared_ptr<predator>(new predator()));
+			for (int pred_gen = 0; pred_gen < state.init_pred; pred_gen++) pred_vec.insert(pred_vec.end(), std::shared_ptr<predator>(new predator(state)));
 
 			state.simulating = true;
 			state.sim_steps = 0;
 			state.frame_steps = 0;
+
+			samples.clear();
 		}
 
-		ImGui::SliderFloat("Predator speed", &state.pred_speed, 0.0f, 1.0f);
-		ImGui::SliderFloat("Predator vision range", &state.pred_see_range, 0.0f, 1.0f);
+		ImGui::Text("");
+
 
 		ImGui::SliderFloat("Prey speed", &state.prey_speed, 0.0f, 1.0f);
 		ImGui::SliderFloat("Prey vision range", &state.prey_see_range, 0.0f, 1.0f);
 
+		ImGui::Text("");
+
+		ImGui::SliderFloat("Predator speed", &state.pred_speed, 0.0f, 1.0f);
+		ImGui::SliderFloat("Predator vision range", &state.pred_see_range, 0.0f, 1.0f);
 		ImGui::SliderFloat("Predator idle speed %", &state.idle_slow, 0.0f, 1.0f);
 		ImGui::SliderFloat("Predator idle direction change", &state.idle_dir_c, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
+
+		ImGui::Text("");
+		ImGui::Text("Consuming one prey gives the predator 1 energy");
+		ImGui::SliderFloat("Predator energy equivalent", &state.energy_on, 0.0f, 20.0f);
+		ImGui::SliderFloat("Predator moving energy cost", &state.energy_mov, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
+
+		ImGui::Text("");
+		ImGui::SliderFloat("Predator terretorial range", &state.terretorial_range, 0.0f, 1.0f);
+
+		ImGui::Text("");
 
 		float o_sim_step_per_frame = state.sim_step_per_frame;
 		ImGui::SliderFloat("Simulation steps per frame", &state.sim_step_per_frame, 0.0f, 500.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
@@ -451,6 +495,25 @@ int main() {
 		ImGui::End();
 
 		sendUniform();
+
+		ImGui::Begin("Results");
+
+		ImGui::SliderInt("Frames per sample", &state.sample_interval, 1, 1000, "%d", ImGuiSliderFlags_Logarithmic);
+
+		ImGui::Text("");
+
+		// TODO: increase size of plot lines
+		for (int attribute = 0; attribute < attributes.size(); attribute++){
+			int am_samples = std::min((int)samples.size(), 100);
+			float* attribute_values = new float[am_samples];
+			for (int filler = 0; filler < am_samples; filler++){
+				attribute_values[filler] = samples[samples.size() - am_samples + filler][attribute].value;
+			}
+			if (am_samples > 0) ImGui::PlotLines(&samples[0][attribute].attribute_name[0], attribute_values, am_samples);
+			delete[] attribute_values;
+		}
+
+		ImGui::End();
 
 		// Renders the ImGUI elements
 		ImGui::Render();

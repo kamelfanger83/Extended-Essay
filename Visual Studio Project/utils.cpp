@@ -1,7 +1,5 @@
 #include "utils.h"
 
-#include <utility>
-
 
 float clamp(float x, float min, float max) {
 	if (x < min) return x;
