@@ -1,25 +1,23 @@
-#pragma once
-
 #ifndef D_CONSTANTS
 #define D_CONSTANTS
 
-namespace constant {
+namespace consts {
 	// state constants
-	int init_prey = 10, init_pred = 10;
-	bool simulating = false;
-	float sim_step_per_frame = 1;
-	float sim_steps, frame_steps;
-
+	extern int init_prey, init_pred;
+	extern bool simulating;
+	extern float sim_step_per_frame;
+	extern float sim_steps, frame_steps;
 	// prey constants
-	float prey_size = 0.02f;
-	float prey_speed = 0.05, prey_see_range = 0.2;
+	extern float prey_size;
+	extern float prey_speed, prey_see_range;
 
 	//predator constants
-	float pred_size = 0.02f;
-	float pred_speed = 0.1, pred_see_range = 0.1;
-	float idle_slow = 0.7; float idle_dir_c = 0.05;
-	float energy_on;
-}
+	extern float pred_size;
+	extern float pred_speed, pred_see_range;
+	extern float idle_slow;
+	extern float idle_dir_c;
+	extern float energy_on;
+};
 
 
 #endif // !D_CONSTANTS

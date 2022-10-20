@@ -1,4 +1,5 @@
-#pragma once
+#ifndef D_ANIMALS
+#define D_ANIMALS
 
 #include <vector>
 #include <memory>
@@ -6,6 +7,8 @@
 
 #include "utils.h"
 #include "constants.h"
+
+#endif //!D_ANIMALS
 
 class predator;
 
