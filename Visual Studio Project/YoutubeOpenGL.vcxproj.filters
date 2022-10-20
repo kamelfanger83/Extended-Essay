@@ -54,9 +54,6 @@
     <ClCompile Include="utils.cpp">
       <Filter>Source Files\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="constants.cpp">
-      <Filter>Source Files\imgui</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -89,7 +86,7 @@
     <ClInclude Include="utils.h">
       <Filter>Header Files\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="constants.h">
+    <ClInclude Include="state.h">
       <Filter>Header Files\imgui</Filter>
     </ClInclude>
   </ItemGroup>

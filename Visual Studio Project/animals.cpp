@@ -13,7 +13,7 @@ prey::prey() { // generate prey evenly within game circle
 	pos = polartocart(phi, r);
 }
 
-void prey::step(std::list<std::shared_ptr<predator>>& pred_vec) {
+void prey::step(std::list<std::shared_ptr<predator>>& pred_vec, State state) {
 	if (pred_vec.size() == 0) return;
 
 	float min_dst_sq = 10; //distances within field cannot exceed sqrt(2)*2 (diagonals) so square has to be <= 8
@@ -29,7 +29,7 @@ void prey::step(std::list<std::shared_ptr<predator>>& pred_vec) {
 
 	std::pair<float, float> dvec = (*nearest)->pos - pos;
 
-	if (sdlen(pos + norm(dvec, consts::prey_speed)) > 1) {
+	if (sdlen(pos + norm(dvec, state.prey_speed)) > 1) {
 		std::pair<float, float> per_vec = { pos.second, -pos.first }; // make vector perpendicular to position vector to determine in which direction to flee
 
 		if (per_vec * dvec > 0) { // calculate dot product to determine whether per_vec and direction it wants to flee is in the same direction
@@ -42,8 +42,8 @@ void prey::step(std::list<std::shared_ptr<predator>>& pred_vec) {
 
 	if (len(dvec) < 0.0000001) return; //precaution for division
 
-	else if (len(dvec) < consts::prey_see_range) { // move away from nearest predator, distance normalized to speed
-		dvec = norm(dvec, consts::prey_speed);
+	else if (len(dvec) < state.prey_see_range) { // move away from nearest predator, distance normalized to speed
+		dvec = norm(dvec, state.prey_speed);
 		pos = pos - dvec;
 		if (sdlen(pos) > 1) pos = norm(pos, 1);
 	}
@@ -62,11 +62,12 @@ predator::predator(vec2f pos) : pos(pos) {
 	energy = 0;
 }
 
-bool predator::step(std::list<std::shared_ptr<prey>>& prey_vec, std::list<std::shared_ptr<predator>>& pred_vec) {
-	if (energy < -consts::energy_on) return true; // means this creature dies in this frame
-	if (energy > consts::energy_on) {
-		vec2f childpos = pos + polartocart((float)rand() / RAND_MAX * 2 * PI, 5 * consts::pred_speed); // spawn child a little aways so they are not practically the same entity
+bool predator::step(std::list<std::shared_ptr<prey>>& prey_vec, std::list<std::shared_ptr<predator>>& pred_vec, State state) {
+	if (energy < -state.energy_on) return true; // means this creature dies in this frame
+	if (energy > state.energy_on) {
+		vec2f childpos = pos + polartocart((float)rand() / RAND_MAX * 2 * PI, 5 * state.pred_speed); // spawn child a little aways so they are not practically the same entity
 		pred_vec.insert(pred_vec.end(), std::shared_ptr<predator>(new predator(childpos)));
+		energy = 0;
 	}
 
 	if (prey_vec.size() == 0) return false;
@@ -84,22 +85,25 @@ bool predator::step(std::list<std::shared_ptr<prey>>& prey_vec, std::list<std::s
 
 	std::pair<float, float> dvec = (*nearest)->pos - pos;
 
-	if (len(dvec) < consts::pred_speed) {
+	if (len(dvec) < state.pred_speed) {
 		(*nearest) = std::shared_ptr<prey>(new prey());
+		energy += 1;
 	}
 
-	else if (len(dvec) < consts::pred_see_range) { // move in direction of nearest prey, distance normalized to speed
-		dvec = norm(dvec, consts::pred_speed);
+	else if (len(dvec) < state.pred_see_range) { // move in direction of nearest prey, distance normalized to speed
+		energy -= state.energy_mov;
+		dvec = norm(dvec, state.pred_speed);
 		pos = pos + dvec;
 		phi_idle = 3 * PI; // set idle direction as unitialized again so it gets regenerated next time
 	}
 
 	else { // move in direction of phi_idle with reduced speed;
+		energy -= state.energy_mov * state.idle_slow * state.idle_slow; //subtract a reduced amount of energy (~square of v bc E = 1/2 m v^2) 
 		if (phi_idle > 2 * PI) phi_idle = (float)rand() / RAND_MAX * 2 * PI;
-		phi_idle += (float)rand() / RAND_MAX * 2 * consts::idle_dir_c - consts::idle_dir_c;
+		phi_idle += (float)rand() / RAND_MAX * 2 * state.idle_dir_c - state.idle_dir_c;
 		if (phi_idle < 0) phi_idle += 2 * PI;
 		if (phi_idle > 2 * PI) phi_idle -= 2 * PI;
-		pos += polartocart(phi_idle, consts::pred_speed * consts::idle_slow);
+		pos += polartocart(phi_idle, state.pred_speed * state.idle_slow);
 		if (sdlen(pos) > 1) {
 			pos = norm(pos, 1);
 			phi_idle = (float)rand() / RAND_MAX * 2 * PI;

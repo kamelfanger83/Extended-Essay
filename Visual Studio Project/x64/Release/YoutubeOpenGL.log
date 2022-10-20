@@ -1,23 +1,26 @@
-﻿  constants.cpp
-C:\Users\linus\CLionProjects\ee\Visual Studio Project\constants.cpp(13,28): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\linus\CLionProjects\ee\Visual Studio Project\constants.cpp(14,31): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\linus\CLionProjects\ee\Visual Studio Project\constants.cpp(18,28): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\linus\CLionProjects\ee\Visual Studio Project\constants.cpp(19,31): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\linus\CLionProjects\ee\Visual Studio Project\constants.cpp(20,26): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\linus\CLionProjects\ee\Visual Studio Project\constants.cpp(21,28): warning C4305: 'initializing': truncation from 'double' to 'float'
+﻿  Main.cpp
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(237,25): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(238,28): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(242,25): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(243,28): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(244,23): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(245,25): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(247,25): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(369,90): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(374,90): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
 LINK : warning LNK4098: defaultlib 'MSVCRTD' conflicts with use of other libs; use /NODEFAULTLIB:library
   Generating code
-  0 of 2125 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+  1 of 2114 functions (<0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+    26 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
 glfw3.lib(context.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3.lib(context.obj)' or at 'C:\Users\linus\CLionProjects\ee\Visual Studio Project\x64\Release\glfw.pdb'; linking object as if no debug info
 glfw3.lib(init.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3.lib(init.obj)' or at 'C:\Users\linus\CLionProjects\ee\Visual Studio Project\x64\Release\glfw.pdb'; linking object as if no debug info
 glfw3.lib(input.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3.lib(input.obj)' or at 'C:\Users\linus\CLionProjects\ee\Visual Studio Project\x64\Release\glfw.pdb'; linking object as if no debug info
-glfw3.lib(monitor.obj) : warning LNK4099: PDB '' was not found with 'glfw3.lib(monitor.obj)' or at ''; linking object as if no debug info
+glfw3.lib(monitor.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3.lib(monitor.obj)' or at 'C:\Users\linus\CLionProjects\ee\Visual Studio Project\x64\Release\glfw.pdb'; linking object as if no debug info
 glfw3.lib(vulkan.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3.lib(vulkan.obj)' or at 'C:\Users\linus\CLionProjects\ee\Visual Studio Project\x64\Release\glfw.pdb'; linking object as if no debug info
 glfw3.lib(window.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3.lib(window.obj)' or at 'C:\Users\linus\CLionProjects\ee\Visual Studio Project\x64\Release\glfw.pdb'; linking object as if no debug info
-glfw3.lib(win32_init.obj) : warning LNK4099: PDB '' was not found with 'glfw3.lib(win32_init.obj)' or at ''; linking object as if no debug info
+glfw3.lib(win32_init.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3.lib(win32_init.obj)' or at 'C:\Users\linus\CLionProjects\ee\Visual Studio Project\x64\Release\glfw.pdb'; linking object as if no debug info
 glfw3.lib(win32_joystick.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3.lib(win32_joystick.obj)' or at 'C:\Users\linus\CLionProjects\ee\Visual Studio Project\x64\Release\glfw.pdb'; linking object as if no debug info
 glfw3.lib(win32_monitor.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3.lib(win32_monitor.obj)' or at 'C:\Users\linus\CLionProjects\ee\Visual Studio Project\x64\Release\glfw.pdb'; linking object as if no debug info
 glfw3.lib(win32_time.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3.lib(win32_time.obj)' or at 'C:\Users\linus\CLionProjects\ee\Visual Studio Project\x64\Release\glfw.pdb'; linking object as if no debug info

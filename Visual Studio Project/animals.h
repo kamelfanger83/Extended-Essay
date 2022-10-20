@@ -6,7 +6,7 @@
 #include <list>
 
 #include "utils.h"
-#include "constants.h"
+#include "state.h"
 
 #endif //!D_ANIMALS
 
@@ -16,7 +16,7 @@ class prey {
 public:
 	vec2f pos;
 	prey();
-	void step(std::list<std::shared_ptr<predator>>& pred_vec);
+	void step(std::list<std::shared_ptr<predator>>& pred_vec, State state);
 };
 
 class predator {
@@ -26,5 +26,5 @@ public:
 	float energy;
 	predator();
 	predator(vec2f);
-	bool step(std::list<std::shared_ptr<prey>>& prey_vec, std::list<std::shared_ptr<predator>>& pred_vec);
+	bool step(std::list<std::shared_ptr<prey>>& prey_vec, std::list<std::shared_ptr<predator>>& pred_vec, State state);
 };
