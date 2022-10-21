@@ -33,6 +33,8 @@ struct State {
 	int sample_total;
 	int sample_step;
 	bool sampling;
+	bool wants_sampling;
+	bool wants_auto_sampling;
 	bool sample_done;
 	int tick;
 	int prey_eaten;

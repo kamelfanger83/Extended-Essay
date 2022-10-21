@@ -256,6 +256,8 @@ int main() {
 	state.tick = 0;
 	state.prey_eaten = 0;
 	state.sample_done = false;
+	state.wants_sampling = false;
+	state.wants_auto_sampling = false;
 
 	sendUniform();
 
@@ -291,7 +293,7 @@ int main() {
 		state.sample_step = 0;
 		state.sampling = false;
 
-		//samples.clear();
+		if(!state.wants_auto_sampling) samples.clear();
 	};
 
 	char fileName[100];
@@ -319,31 +321,33 @@ int main() {
 				for (std::shared_ptr<prey> simulater : prey_vec) {
 					simulater->step(pred_vec, state);
 				}
-				
-				if(state.pre_sample_ticks < state.sample_wait) state.pre_sample_ticks++;
 
-				if (state.pre_sample_ticks == state.sample_wait) {
+				if (!state.wants_sampling && !state.wants_auto_sampling) continue; // i am not very proud of sampling logic but it's ugly bc 2 bools and more conditions and stuff and ew
+				
+				if(state.pre_sample_ticks < state.sample_wait && state.wants_auto_sampling) state.pre_sample_ticks++;
+
+				if (state.pre_sample_ticks == state.sample_wait || (state.wants_sampling && !state.wants_auto_sampling)) {
 
 					state.sampling = true;
 
 					// increase tick every simulation step
 					state.tick++;
 					if (state.tick == state.sample_interval) { // it is time to sample again
-
 						state.sample_step++;
-						if (state.sample_step == state.sample_total) {
-							if (!auto_step()) {
-								state.sample_done = true;
-								state.simulating = false;
-							} 
-							else init_sim();
-						}
-						else {
+
+						if(state.wants_sampling || state.wants_auto_sampling && state.sample_step < state.sample_total) {
 							std::vector<float> this_sample;
 
 							for (auto sampler : attributes) this_sample.push_back(sampler.get());
 
 							samples.push_back(this_sample);
+						}
+						else { // must be autosampling and sample_step = sample_total
+							if (!auto_step()) {
+								state.sample_done = true;
+								state.simulating = false;
+							} 
+							else init_sim();
 						}
 
 						// reset for next interval
@@ -358,111 +362,110 @@ int main() {
 
 		drawBG(shaderProgramBG, out_color);
 
-		if (state.simulating) { // draw out predators and prey if simulation is running
+		// DRAW CREATURES
 
-			// generate vertex array for prey
-			int prey_corn = 8; // corners prey body should have
-			float* prey_vertices = new float[prey_vec.size() * 2 * prey_corn];
-			auto cur_prey = prey_vec.begin();
-			for (int oct = 0; oct < prey_vec.size(); oct++) { // generatation of vertices: iterate through prey and for each draw polygon centered at x,y
-				for (int i = 0; i < prey_corn; i++) {
-					prey_vertices[oct * 2 * prey_corn + i * 2] = (*cur_prey)->pos.first + state.prey_size * cos(2 * PI / prey_corn * i);
-					prey_vertices[oct * 2 * prey_corn + i * 2 + 1] = (*cur_prey)->pos.second + state.prey_size * sin(2 * PI / prey_corn * i);
-				}
-				cur_prey++;
+		// generate vertex array for prey
+		int prey_corn = 8; // corners prey body should have
+		float* prey_vertices = new float[prey_vec.size() * 2 * prey_corn];
+		auto cur_prey = prey_vec.begin();
+		for (int oct = 0; oct < prey_vec.size(); oct++) { // generatation of vertices: iterate through prey and for each draw polygon centered at x,y
+			for (int i = 0; i < prey_corn; i++) {
+				prey_vertices[oct * 2 * prey_corn + i * 2] = (*cur_prey)->pos.first + state.prey_size * cos(2 * PI / prey_corn * i);
+				prey_vertices[oct * 2 * prey_corn + i * 2 + 1] = (*cur_prey)->pos.second + state.prey_size * sin(2 * PI / prey_corn * i);
 			}
-
-			// generate index array for prey
-			unsigned int* prey_indices = new unsigned int[prey_vec.size() * 3 * (prey_corn - 2)];
-			for (int oct = 0; oct < prey_vec.size(); oct++) { // generation of indices: loop through polygons and for each connect first vertex to all pairs of consecutive vertices afterwards to form shape by triangles.
-				for (int lower = 1; lower < prey_corn - 1; lower++) {
-					prey_indices[oct * 3 * (prey_corn - 2) + (lower - 1) * 3] = oct * prey_corn;
-					prey_indices[oct * 3 * (prey_corn - 2) + (lower - 1) * 3 + 1] = oct * prey_corn + lower;
-					prey_indices[oct * 3 * (prey_corn - 2) + (lower - 1) * 3 + 2] = oct * prey_corn + lower + 1;
-				}
-			}
-
-			// generate vertex and index array for predator the same way as for prey ==> TODO: make lambda and only write code once
-			int pred_corn = 6;
-			float* pred_vertices = new float[pred_vec.size() * 2 * pred_corn];
-			auto cur_pred = pred_vec.begin();
-			for (int hex = 0; hex < pred_vec.size(); hex++) {
-				for (int i = 0; i < pred_corn; i++) {
-					pred_vertices[hex * 2 * pred_corn + i * 2] = (*cur_pred)->pos.first + state.pred_size * cos(2 * PI / pred_corn * i);
-					pred_vertices[hex * 2 * pred_corn + i * 2 + 1] = (*cur_pred)->pos.second + state.pred_size * sin(2 * PI / pred_corn * i);
-				}
-				cur_pred++;
-			}
-
-			unsigned int* pred_indices = new unsigned int[pred_vec.size() * 3 * (pred_corn - 2)];
-			for (int hex = 0; hex < pred_vec.size(); hex++) {
-				for (int lower = 1; lower < pred_corn - 1; lower++) {
-					pred_indices[hex * 3 * (pred_corn - 2) + (lower - 1) * 3] = hex * pred_corn;
-					pred_indices[hex * 3 * (pred_corn - 2) + (lower - 1) * 3 + 1] = hex * pred_corn + lower;
-					pred_indices[hex * 3 * (pred_corn - 2) + (lower - 1) * 3 + 2] = hex * pred_corn + lower + 1;
-				}
-			}
-
-
-			// create vertex buffer, vertex array and element buffer from arrays created above to then use to be rendered
-			unsigned int prey_VBO, prey_VAO, prey_EBO;
-			unsigned int pred_VBO, pred_VAO, pred_EBO;
-
-			glGenBuffers(1, &prey_VBO);
-			glGenBuffers(1, &prey_EBO);
-			glGenVertexArrays(1, &prey_VAO);
-
-			glGenBuffers(1, &pred_VBO);
-			glGenBuffers(1, &pred_EBO);
-			glGenVertexArrays(1, &pred_VAO);
-
-
-			glBindVertexArray(prey_VAO);
-
-			glBindBuffer(GL_ARRAY_BUFFER, prey_VBO);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * prey_corn * prey_vec.size(), prey_vertices, GL_STATIC_DRAW);
-
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prey_EBO);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(float) * 3 * (prey_corn - 2) * prey_vec.size(), prey_indices, GL_STATIC_DRAW);
-
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-			glEnableVertexAttribArray(0);
-
-			glBindVertexArray(pred_VAO);
-
-			glBindBuffer(GL_ARRAY_BUFFER, pred_VBO);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * pred_corn * pred_vec.size(), pred_vertices, GL_STATIC_DRAW);
-
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pred_EBO);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(float) * 3 * (pred_corn - 2) * pred_vec.size(), pred_indices, GL_STATIC_DRAW);
-
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-			glEnableVertexAttribArray(0);
-
-			// render out vertex array using respective shader program and element buffer
-			glUseProgram(prey_shaderProgram);
-			glBindVertexArray(prey_VAO);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prey_EBO);
-			glDrawElements(GL_TRIANGLES, 3 * (prey_corn - 2) * prey_vec.size(), GL_UNSIGNED_INT, 0);
-
-			glUseProgram(pred_shaderProgram);
-			glBindVertexArray(pred_VAO);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pred_EBO);
-			glDrawElements(GL_TRIANGLES, 3 * (pred_corn - 2) * pred_vec.size(), GL_UNSIGNED_INT, 0);
-
-			// delete buffers and arrays as they will be created again next frame and no longer needed
-			glDeleteBuffers(1, &prey_VBO);
-			glDeleteBuffers(1, &prey_EBO);
-			glDeleteVertexArrays(1, &prey_VAO);
-			delete[] prey_vertices;
-			delete[] prey_indices;
-
-			glDeleteBuffers(1, &pred_VBO);
-			glDeleteBuffers(1, &pred_EBO);
-			glDeleteVertexArrays(1, &pred_VAO);
-			delete[] pred_vertices;
-			delete[] pred_indices;
+			cur_prey++;
 		}
+
+		// generate index array for prey
+		unsigned int* prey_indices = new unsigned int[prey_vec.size() * 3 * (prey_corn - 2)];
+		for (int oct = 0; oct < prey_vec.size(); oct++) { // generation of indices: loop through polygons and for each connect first vertex to all pairs of consecutive vertices afterwards to form shape by triangles.
+			for (int lower = 1; lower < prey_corn - 1; lower++) {
+				prey_indices[oct * 3 * (prey_corn - 2) + (lower - 1) * 3] = oct * prey_corn;
+				prey_indices[oct * 3 * (prey_corn - 2) + (lower - 1) * 3 + 1] = oct * prey_corn + lower;
+				prey_indices[oct * 3 * (prey_corn - 2) + (lower - 1) * 3 + 2] = oct * prey_corn + lower + 1;
+			}
+		}
+
+		// generate vertex and index array for predator the same way as for prey ==> TODO: make lambda and only write code once
+		int pred_corn = 6;
+		float* pred_vertices = new float[pred_vec.size() * 2 * pred_corn];
+		auto cur_pred = pred_vec.begin();
+		for (int hex = 0; hex < pred_vec.size(); hex++) {
+			for (int i = 0; i < pred_corn; i++) {
+				pred_vertices[hex * 2 * pred_corn + i * 2] = (*cur_pred)->pos.first + state.pred_size * cos(2 * PI / pred_corn * i);
+				pred_vertices[hex * 2 * pred_corn + i * 2 + 1] = (*cur_pred)->pos.second + state.pred_size * sin(2 * PI / pred_corn * i);
+			}
+			cur_pred++;
+		}
+
+		unsigned int* pred_indices = new unsigned int[pred_vec.size() * 3 * (pred_corn - 2)];
+		for (int hex = 0; hex < pred_vec.size(); hex++) {
+			for (int lower = 1; lower < pred_corn - 1; lower++) {
+				pred_indices[hex * 3 * (pred_corn - 2) + (lower - 1) * 3] = hex * pred_corn;
+				pred_indices[hex * 3 * (pred_corn - 2) + (lower - 1) * 3 + 1] = hex * pred_corn + lower;
+				pred_indices[hex * 3 * (pred_corn - 2) + (lower - 1) * 3 + 2] = hex * pred_corn + lower + 1;
+			}
+		}
+
+
+		// create vertex buffer, vertex array and element buffer from arrays created above to then use to be rendered
+		unsigned int prey_VBO, prey_VAO, prey_EBO;
+		unsigned int pred_VBO, pred_VAO, pred_EBO;
+
+		glGenBuffers(1, &prey_VBO);
+		glGenBuffers(1, &prey_EBO);
+		glGenVertexArrays(1, &prey_VAO);
+
+		glGenBuffers(1, &pred_VBO);
+		glGenBuffers(1, &pred_EBO);
+		glGenVertexArrays(1, &pred_VAO);
+
+
+		glBindVertexArray(prey_VAO);
+
+		glBindBuffer(GL_ARRAY_BUFFER, prey_VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * prey_corn * prey_vec.size(), prey_vertices, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prey_EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(float) * 3 * (prey_corn - 2) * prey_vec.size(), prey_indices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+
+		glBindVertexArray(pred_VAO);
+
+		glBindBuffer(GL_ARRAY_BUFFER, pred_VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * pred_corn * pred_vec.size(), pred_vertices, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pred_EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(float) * 3 * (pred_corn - 2) * pred_vec.size(), pred_indices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+
+		// render out vertex array using respective shader program and element buffer
+		glUseProgram(prey_shaderProgram);
+		glBindVertexArray(prey_VAO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prey_EBO);
+		glDrawElements(GL_TRIANGLES, 3 * (prey_corn - 2) * prey_vec.size(), GL_UNSIGNED_INT, 0);
+
+		glUseProgram(pred_shaderProgram);
+		glBindVertexArray(pred_VAO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pred_EBO);
+		glDrawElements(GL_TRIANGLES, 3 * (pred_corn - 2) * pred_vec.size(), GL_UNSIGNED_INT, 0);
+
+		// delete buffers and arrays as they will be created again next frame and no longer needed
+		glDeleteBuffers(1, &prey_VBO);
+		glDeleteBuffers(1, &prey_EBO);
+		glDeleteVertexArrays(1, &prey_VAO);
+		delete[] prey_vertices;
+		delete[] prey_indices;
+
+		glDeleteBuffers(1, &pred_VBO);
+		glDeleteBuffers(1, &pred_EBO);
+		glDeleteVertexArrays(1, &pred_VAO);
+		delete[] pred_vertices;
+		delete[] pred_indices;
 
 		// Info window
 		ImGui::SetNextWindowSize(ImVec2(300.f, 0.f), ImGuiCond_FirstUseEver); // make sure window is not very narrow on first startup
@@ -470,7 +473,7 @@ int main() {
 		ImGui::Begin("Info");
 
 		ImGui::TextWrapped("This is an individual based predator simulation.");
-		ImGui::TextWrapped("You can choose settings in the respective tabs. Tweak them until you are happy and then press \"Start Simulation\" to start a simulation.");
+		ImGui::TextWrapped("You can choose settings in the respective tabs. Tweak them until you are happy and then press \"Initialize Simulation\" to start a simulation.");
 		ImGui::TextWrapped("Please also explore what you can do with these windows. You can for example merge them by hovering with one over the other and putting it on one of the blue indicators. You can then also adjust how much place each window gets.");
 		ImGui::TextWrapped("Some sliders are not linear in case you are confused.");
 		ImGui::TextWrapped("The fps are limited to your screens max fps so if the simulation runs slowly for you you might want to increase the simulation steps per frame");
@@ -498,8 +501,14 @@ int main() {
 		ImGui::Begin("Simulation options");
 		ImGui::SliderInt("Initial prey", &state.init_prey, 0, 100);
 		ImGui::SliderInt("Initial predators", &state.init_pred, 0, 100);
-		if (ImGui::Button("Start Simulation")) {
+		if (ImGui::Button("Initialize Simulation")) {
 			init_sim();
+		}
+		if (ImGui::Button("Pause Simulation")) {
+			state.simulating = false;
+		}
+		if (ImGui::Button("Resume simulation")) {
+			state.simulating = true;
 		}
 
 		ImGui::Text("");
@@ -537,6 +546,11 @@ int main() {
 		sendUniform();
 
 		ImGui::Begin("Results");
+
+		ImGui::Checkbox("Sample", &state.wants_sampling);
+		ImGui::Checkbox("Auto-Sample", &state.wants_auto_sampling);
+
+		ImGui::Text("");
 
 		ImGui::SliderInt("Frames per sample", &state.sample_interval, 1, 1000, "%d", ImGuiSliderFlags_Logarithmic);
 

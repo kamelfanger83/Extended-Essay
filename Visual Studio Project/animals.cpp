@@ -72,7 +72,23 @@ bool predator::step(std::list<std::shared_ptr<prey>>& prey_vec, std::list<std::s
 		energy -= state.energy_on;
 	}
 
-	if (prey_vec.size() == 0) return false;
+	auto move_idle = [&]() { // helper lambda because two places need to move idle
+		energy -= state.energy_mov * state.idle_slow * state.idle_slow; //subtract a reduced amount of energy (~square of v bc E = 1/2 m v^2) 
+		if (phi_idle > 2 * PI) phi_idle = (float)rand() / RAND_MAX * 2 * PI;
+		phi_idle += (float)rand() / RAND_MAX * 2 * state.idle_dir_c - state.idle_dir_c;
+		if (phi_idle < 0) phi_idle += 2 * PI;
+		if (phi_idle > 2 * PI) phi_idle -= 2 * PI;
+		pos += polartocart(phi_idle, state.pred_speed * state.idle_slow);
+		if (sdlen(pos) > 1) {
+			pos = norm(pos, 1);
+			phi_idle = (float)rand() / RAND_MAX * 2 * PI;
+		}
+	};
+
+	if (prey_vec.size() == 0) {
+		move_idle();
+		return false;
+	}
 
 	if (pred_vec.size() > 1) {
 		float pred_min_dst_sq = 10; //distances within field cannot exceed sqrt(2)*2 (diagonals) so square has to be <= 8
@@ -140,16 +156,7 @@ bool predator::step(std::list<std::shared_ptr<prey>>& prey_vec, std::list<std::s
 	}
 
 	else { // move in direction of phi_idle with reduced speed;
-		energy -= state.energy_mov * state.idle_slow * state.idle_slow; //subtract a reduced amount of energy (~square of v bc E = 1/2 m v^2) 
-		if (phi_idle > 2 * PI) phi_idle = (float)rand() / RAND_MAX * 2 * PI;
-		phi_idle += (float)rand() / RAND_MAX * 2 * state.idle_dir_c - state.idle_dir_c;
-		if (phi_idle < 0) phi_idle += 2 * PI;
-		if (phi_idle > 2 * PI) phi_idle -= 2 * PI;
-		pos += polartocart(phi_idle, state.pred_speed * state.idle_slow);
-		if (sdlen(pos) > 1) {
-			pos = norm(pos, 1);
-			phi_idle = (float)rand() / RAND_MAX * 2 * PI;
-		}
+		move_idle();
 	}
 	return false;
 }
