@@ -24,6 +24,8 @@ public:
 	vec2f pos;
 	float phi_idle;
 	float energy;
+	int scared_frames;
+	vec2f scared_step;
 	predator(State state);
 	predator(vec2f, State state);
 	bool step(std::list<std::shared_ptr<prey>>& prey_vec, std::list<std::shared_ptr<predator>>& pred_vec, std::list<std::shared_ptr<predator>>::iterator self, State& state);

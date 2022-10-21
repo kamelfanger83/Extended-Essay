@@ -56,10 +56,12 @@ predator::predator(State state) { // generate predators evenly within game circl
 	pos = polartocart(phi, r);
 	phi_idle = 3 * PI; // initialize phi_idle to 3 * PI which i define as undefined -> has to be initialized first;
 	energy = state.energy_on;
+	scared_frames = 0;
 }
 
 predator::predator(vec2f pos, State state) : pos(pos) {
 	energy = state.energy_on;
+	scared_frames = 0;
 }
 
 bool predator::step(std::list<std::shared_ptr<prey>>& prey_vec, std::list<std::shared_ptr<predator>>& pred_vec, std::list<std::shared_ptr<predator>>::iterator self, State& state) {
@@ -72,25 +74,42 @@ bool predator::step(std::list<std::shared_ptr<prey>>& prey_vec, std::list<std::s
 
 	if (prey_vec.size() == 0) return false;
 
-	float pred_min_dst_sq = 10; //distances within field cannot exceed sqrt(2)*2 (diagonals) so square has to be <= 8
-	auto pred_nearest = pred_vec.begin();
+	if (pred_vec.size() > 1) {
+		float pred_min_dst_sq = 10; //distances within field cannot exceed sqrt(2)*2 (diagonals) so square has to be <= 8
+		auto pred_nearest = pred_vec.begin();
 
-	for (auto cand_nearest = pred_vec.begin(); cand_nearest != pred_vec.end(); cand_nearest++) { //iterate through prey to find one that is closest (could be done more efficiently by using datastructure trees optimised for NN but this is likely not the bottleneck in my simulation)
-		if (cand_nearest == self) continue;
-		vec2f dif = (*cand_nearest)->pos - pos;
-		if (sdlen(dif) < pred_min_dst_sq) {
-			pred_min_dst_sq = sdlen(dif);
-			pred_nearest = cand_nearest;
+		for (auto cand_nearest = pred_vec.begin(); cand_nearest != pred_vec.end(); cand_nearest++) { //iterate through prey to find one that is closest (could be done more efficiently by using datastructure trees optimised for NN but this is likely not the bottleneck in my simulation)
+			if (cand_nearest == self) continue;
+			vec2f dif = (*cand_nearest)->pos - pos;
+			if (sdlen(dif) < pred_min_dst_sq) {
+				pred_min_dst_sq = sdlen(dif);
+				pred_nearest = cand_nearest;
+			}
+		}
+
+		vec2f dvec = (*pred_nearest)->pos - pos;
+
+		if (len(dvec) < state.terretorial_range) {
+			energy -= state.energy_mov;
+			dvec = norm(dvec, state.pred_speed);
+			pos = pos - dvec;
+			phi_idle = 3 * PI; // set idle direction as unitialized again so it gets regenerated next time
+			scared_frames = state.init_scared;
+			scared_step = dvec;
+
+			(*pred_nearest)->scared_frames = state.init_scared; // set other predator also scared because my step would go out of his scared range otherwise
+			(*pred_nearest)->scared_step = dvec * -1;
+			(*pred_nearest)->phi_idle = 3 * PI;
+
+			return false;
 		}
 	}
 
-	vec2f dvec = (*pred_nearest)->pos - pos;
-
-	if (len(dvec) < state.terretorial_range) {
+	if (scared_frames > 0) {
 		energy -= state.energy_mov;
-		dvec = norm(dvec, state.pred_speed);
-		pos = pos - dvec;
-		phi_idle = 3 * PI; // set idle direction as unitialized again so it gets regenerated next time
+		scared_frames--;
+		pos = pos - scared_step;
+		if (sdlen(pos) > 1) pos = norm(pos, 1);
 		return false;
 	}
 
@@ -105,7 +124,7 @@ bool predator::step(std::list<std::shared_ptr<prey>>& prey_vec, std::list<std::s
 		}
 	}
 
-	dvec = (*prey_nearest)->pos - pos;
+	vec2f dvec = (*prey_nearest)->pos - pos;
 
 	if (len(dvec) < state.pred_speed) {
 		(*prey_nearest) = std::shared_ptr<prey>(new prey());

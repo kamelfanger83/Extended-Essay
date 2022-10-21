@@ -2,13 +2,14 @@
 #define D_CONSTANTS
 
 #include <string>
+#include <functional>
 
 struct State {
 	// state constants
 	int init_prey, init_pred;
 	bool simulating;
 	float sim_step_per_frame;
-	float sim_steps, frame_steps;
+	double sim_steps, frame_steps;
 
 	// prey constants
 	float prey_size;
@@ -22,6 +23,7 @@ struct State {
 	float energy_on;
 	float energy_mov;
 	float terretorial_range;
+	int init_scared;
 	// eating always gives 1 energy
 
 	//tracking constants
@@ -30,10 +32,10 @@ struct State {
 	int prey_eaten;
 };
 
-struct sampled_attribute {
+struct attribute {
 	std::string attribute_name;
-	float value;
-	sampled_attribute(std::string attribute_name, float value) : attribute_name(attribute_name), value(value) {}
+	std::function<float()> get;
+	attribute(std::string attribute_name, std::function<float()> get) : attribute_name(attribute_name), get(get) {}
 };
 
 #endif // !D_CONSTANTS

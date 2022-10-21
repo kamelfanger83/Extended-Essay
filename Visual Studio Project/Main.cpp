@@ -11,7 +11,7 @@
 #include <list>
 #include <functional>
 #include <cmath>
-
+#include <fstream>
 
 #include "state.h"
 #include "animals.h"
@@ -247,6 +247,7 @@ int main() {
 	state.energy_on = 5;
 	state.energy_mov = 0.01;
 	state.terretorial_range = 0.1;
+	state.init_scared = 20;
 
 	// track constants
 	state.sample_interval = 100;
@@ -258,12 +259,14 @@ int main() {
 	std::list<std::shared_ptr<prey>> prey_vec;
 	std::list<std::shared_ptr<predator>> pred_vec;
 
-	std::vector <std::function<sampled_attribute()>> attributes;
-	attributes.push_back([&]() {return sampled_attribute("predation rate", (float)state.prey_eaten / prey_vec.size()); });
-	attributes.push_back([&]() {return sampled_attribute("prey population size", prey_vec.size()); });
-	attributes.push_back([&]() {return sampled_attribute("predator population size", pred_vec.size()); });
+	std::vector <attribute> attributes;
+	attributes.push_back(attribute("predation rate", [&]() {return  (float)state.prey_eaten / prey_vec.size(); }));
+	attributes.push_back(attribute("prey population size", [&]() {return  (float)prey_vec.size(); }));
+	attributes.push_back(attribute("predator population size", [&]() {return  (float)pred_vec.size(); }));
 
-	std::vector<std::vector<sampled_attribute>> samples;
+	std::vector<std::vector<float>> samples;
+
+	char fileName[100];
 
 	// Main while loop
 	while (!glfwWindowShouldClose(window)) {
@@ -292,9 +295,9 @@ int main() {
 				// increase tick every simulation step
 				state.tick++;
 				if (state.tick == state.sample_interval) { // it is time to sample again
-					std::vector<sampled_attribute> this_sample;
+					std::vector<float> this_sample;
 				
-					for (auto sampler : attributes) this_sample.push_back(sampler());
+					for (auto sampler : attributes) this_sample.push_back(sampler.get());
 
 					samples.push_back(this_sample);
 
@@ -426,7 +429,6 @@ int main() {
 
 		ImGui::TextWrapped("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
-
 		// Visual options menu
 		ImGui::Begin("Visual options");
 
@@ -483,6 +485,7 @@ int main() {
 
 		ImGui::Text("");
 		ImGui::SliderFloat("Predator terretorial range", &state.terretorial_range, 0.0f, 1.0f);
+		ImGui::SliderInt("Predator scared frames", &state.init_scared, 0, 100);
 
 		ImGui::Text("");
 
@@ -507,10 +510,27 @@ int main() {
 			int am_samples = std::min((int)samples.size(), 100);
 			float* attribute_values = new float[am_samples];
 			for (int filler = 0; filler < am_samples; filler++){
-				attribute_values[filler] = samples[samples.size() - am_samples + filler][attribute].value;
+				attribute_values[filler] = samples[samples.size() - am_samples + filler][attribute];
 			}
-			if (am_samples > 0) ImGui::PlotLines(&samples[0][attribute].attribute_name[0], attribute_values, am_samples);
+			if (am_samples > 0) ImGui::PlotLines(&attributes[attribute].attribute_name[0], attribute_values, am_samples);
 			delete[] attribute_values;
+		}
+
+		ImGui::InputText("Enter filename for export", fileName, 100);
+
+		if (ImGui::Button("Export samples") && !samples.empty()) {
+			std::ofstream outputFile (fileName);
+			for (int labels = 0; labels < attributes.size()-1; labels++){
+				outputFile << "\"" << attributes[labels].attribute_name << "\",";
+			}
+			outputFile << "\"" << attributes[attributes.size()-1].attribute_name << "\"" <<"\n";
+			for (auto line : samples) {
+				for (int i = 0; i < attributes.size()-1; i++){
+					outputFile << line[i] << ",";
+				}
+				outputFile << line[attributes.size()-1] << "\n";
+			}
+			outputFile.close();
 		}
 
 		ImGui::End();
