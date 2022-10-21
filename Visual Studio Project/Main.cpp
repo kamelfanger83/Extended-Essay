@@ -250,9 +250,12 @@ int main() {
 	state.init_scared = 20;
 
 	// track constants
+	state.sample_wait = 100000; // wait some simulation ticks until hopefully equilibrium is established
 	state.sample_interval = 100;
+	state.sample_total = 1000;
 	state.tick = 0;
 	state.prey_eaten = 0;
+	state.sample_done = false;
 
 	sendUniform();
 
@@ -260,11 +263,36 @@ int main() {
 	std::list<std::shared_ptr<predator>> pred_vec;
 
 	std::vector <attribute> attributes;
-	attributes.push_back(attribute("predation rate", [&]() {return  (float)state.prey_eaten / prey_vec.size(); }));
-	attributes.push_back(attribute("prey population size", [&]() {return  (float)prey_vec.size(); }));
-	attributes.push_back(attribute("predator population size", [&]() {return  (float)pred_vec.size(); }));
-
+	attributes.push_back(attribute("sample step", [&]() {return state.sample_step; })); // give how many samples we are into simulation
+	attributes.push_back(attribute("predation rate", [&]() {return  (float)state.prey_eaten / prey_vec.size(); })); // give predation rate
+	attributes.push_back(attribute("prey population size", [&]() {return  (float)prey_vec.size(); })); // give prey population size
+	attributes.push_back(attribute("predator population size", [&]() {return  (float)pred_vec.size(); })); // give predator population size
+	
 	std::vector<std::vector<float>> samples;
+
+	auto auto_step = [&]() {
+		state.init_prey++;
+		if (state.init_prey == 100) return false;
+		return true;
+	}; // lambda for step for autosampling (similar to for loop around whole thing but not as ugly)
+
+	auto init_sim = [&]() {
+		// generate fresh prey and predators
+		prey_vec.clear();
+		pred_vec.clear();
+		for (int prey_gen = 0; prey_gen < state.init_prey; prey_gen++) prey_vec.insert(prey_vec.end(), std::shared_ptr<prey>(new prey()));
+		for (int pred_gen = 0; pred_gen < state.init_pred; pred_gen++) pred_vec.insert(pred_vec.end(), std::shared_ptr<predator>(new predator(state)));
+
+		state.simulating = true;
+		state.sim_steps = 0;
+		state.frame_steps = 0;
+
+		state.pre_sample_ticks = 0;
+		state.sample_step = 0;
+		state.sampling = false;
+
+		//samples.clear();
+	};
 
 	char fileName[100];
 
@@ -291,19 +319,37 @@ int main() {
 				for (std::shared_ptr<prey> simulater : prey_vec) {
 					simulater->step(pred_vec, state);
 				}
-
-				// increase tick every simulation step
-				state.tick++;
-				if (state.tick == state.sample_interval) { // it is time to sample again
-					std::vector<float> this_sample;
 				
-					for (auto sampler : attributes) this_sample.push_back(sampler.get());
+				if(state.pre_sample_ticks < state.sample_wait) state.pre_sample_ticks++;
 
-					samples.push_back(this_sample);
+				if (state.pre_sample_ticks == state.sample_wait) {
 
-					// reset for next interval
-					state.tick = 0;
-					state.prey_eaten = 0;
+					state.sampling = true;
+
+					// increase tick every simulation step
+					state.tick++;
+					if (state.tick == state.sample_interval) { // it is time to sample again
+
+						state.sample_step++;
+						if (state.sample_step == state.sample_total) {
+							if (!auto_step()) {
+								state.sample_done = true;
+								state.simulating = false;
+							} 
+							else init_sim();
+						}
+						else {
+							std::vector<float> this_sample;
+
+							for (auto sampler : attributes) this_sample.push_back(sampler.get());
+
+							samples.push_back(this_sample);
+						}
+
+						// reset for next interval
+						state.tick = 0;
+						state.prey_eaten = 0;
+					}
 				}
 			}
 		}
@@ -419,6 +465,8 @@ int main() {
 		}
 
 		// Info window
+		ImGui::SetNextWindowSize(ImVec2(300.f, 0.f), ImGuiCond_FirstUseEver); // make sure window is not very narrow on first startup
+
 		ImGui::Begin("Info");
 
 		ImGui::TextWrapped("This is an individual based predator simulation.");
@@ -451,18 +499,7 @@ int main() {
 		ImGui::SliderInt("Initial prey", &state.init_prey, 0, 100);
 		ImGui::SliderInt("Initial predators", &state.init_pred, 0, 100);
 		if (ImGui::Button("Start Simulation")) {
-
-			// generate fresh prey and predators
-			prey_vec.clear();
-			pred_vec.clear();
-			for (int prey_gen = 0; prey_gen < state.init_prey; prey_gen++) prey_vec.insert(prey_vec.end(), std::shared_ptr<prey>(new prey()));
-			for (int pred_gen = 0; pred_gen < state.init_pred; pred_gen++) pred_vec.insert(pred_vec.end(), std::shared_ptr<predator>(new predator(state)));
-
-			state.simulating = true;
-			state.sim_steps = 0;
-			state.frame_steps = 0;
-
-			samples.clear();
+			init_sim();
 		}
 
 		ImGui::Text("");
@@ -490,7 +527,7 @@ int main() {
 		ImGui::Text("");
 
 		float o_sim_step_per_frame = state.sim_step_per_frame;
-		ImGui::SliderFloat("Simulation steps per frame", &state.sim_step_per_frame, 0.0f, 500.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
+		ImGui::SliderFloat("Simulation steps per frame", &state.sim_step_per_frame, 0.0f, 2000.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
 		if (o_sim_step_per_frame != state.sim_step_per_frame) {
 			state.sim_steps = 0; state.frame_steps = 0;
 		}
@@ -516,24 +553,30 @@ int main() {
 			delete[] attribute_values;
 		}
 
-		ImGui::InputText("Enter filename for export", fileName, 100);
-
-		if (ImGui::Button("Export samples") && !samples.empty()) {
-			std::ofstream outputFile (fileName);
-			for (int labels = 0; labels < attributes.size()-1; labels++){
-				outputFile << "\"" << attributes[labels].attribute_name << "\",";
-			}
-			outputFile << "\"" << attributes[attributes.size()-1].attribute_name << "\"" <<"\n";
-			for (auto line : samples) {
-				for (int i = 0; i < attributes.size()-1; i++){
-					outputFile << line[i] << ",";
-				}
-				outputFile << line[attributes.size()-1] << "\n";
-			}
-			outputFile.close();
-		}
-
 		ImGui::End();
+
+		if (state.sample_done) {
+			ImGui::Begin("Export");
+
+			ImGui::InputText("Enter filename for export", fileName, 100);
+
+			if (ImGui::Button("Export samples") && !samples.empty()) {
+				std::ofstream outputFile (fileName, std::ios_base::out | std::ios_base::trunc);
+				for (int labels = 0; labels < attributes.size()-1; labels++){
+					outputFile << "\"" << attributes[labels].attribute_name << "\",";
+				}
+				outputFile << "\"" << attributes[attributes.size()-1].attribute_name << "\"" <<"\n";
+				for (auto line : samples) {
+					for (int i = 0; i < attributes.size()-1; i++){
+						outputFile << line[i] << ",";
+					}
+					outputFile << line[attributes.size()-1] << "\n";
+				}
+				outputFile.close();
+			}
+
+			ImGui::End();
+		}
 
 		// Renders the ImGUI elements
 		ImGui::Render();

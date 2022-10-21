@@ -27,7 +27,13 @@ struct State {
 	// eating always gives 1 energy
 
 	//tracking constants
+	int pre_sample_ticks;
+	int sample_wait;
 	int sample_interval;
+	int sample_total;
+	int sample_step;
+	bool sampling;
+	bool sample_done;
 	int tick;
 	int prey_eaten;
 };

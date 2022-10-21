@@ -129,7 +129,7 @@ bool predator::step(std::list<std::shared_ptr<prey>>& prey_vec, std::list<std::s
 	if (len(dvec) < state.pred_speed) {
 		(*prey_nearest) = std::shared_ptr<prey>(new prey());
 		energy += 1;
-		state.prey_eaten++;
+		if (state.sampling) state.prey_eaten++;
 	}
 
 	else if (len(dvec) < state.pred_see_range) { // move in direction of nearest prey, distance normalized to speed
