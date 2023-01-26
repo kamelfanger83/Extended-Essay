@@ -1,0 +1,69 @@
+﻿  Main.cpp
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(110,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(241,29): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(242,33): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(246,29): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(247,32): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(248,27): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(249,29): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(251,29): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(252,35): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(284,45): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(296,44): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(298,45): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(300,44): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(532,89): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(537,89): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(753,27): warning C4244: 'return': conversion from 'int' to '_Rx', possible loss of data
+          with
+          [
+              _Rx=float
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(919): message : see reference to function template instantiation '_Rx std::_Invoker_ret<_Rx,false>::_Call<_Callable&,>(_Fx) noexcept(false)' being compiled
+          with
+          [
+              _Rx=float,
+              _Callable=main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>,
+              _Fx=main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e> &
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(920): message : see reference to function template instantiation '_Rx std::_Invoker_ret<_Rx,false>::_Call<_Callable&,>(_Fx) noexcept(false)' being compiled
+          with
+          [
+              _Rx=float,
+              _Callable=main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>,
+              _Fx=main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e> &
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(919): message : while compiling class template member function '_Rx std::_Func_impl_no_alloc<main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>,_Rx>::_Do_call(void)'
+          with
+          [
+              _Rx=float
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(813): message : see reference to class template instantiation 'std::_Func_impl_no_alloc<main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>,_Ret>' being compiled
+          with
+          [
+              _Ret=float
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(1010): message : see reference to variable template 'const bool _Is_large<std::_Func_impl_no_alloc<<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>,float> >' being compiled
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(1143): message : see reference to function template instantiation 'void std::_Func_class<_Ret>::_Reset<main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>>(_Fx &&)' being compiled
+          with
+          [
+              _Ret=float,
+              _Fx=main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(1143): message : see reference to function template instantiation 'void std::_Func_class<_Ret>::_Reset<main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>>(_Fx &&)' being compiled
+          with
+          [
+              _Ret=float,
+              _Fx=main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>
+          ]
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(306): message : see reference to function template instantiation 'std::function<float (void)>::function<main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>,0>(_Fx)' being compiled
+          with
+          [
+              _Fx=main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>
+          ]
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(306): message : see reference to function template instantiation 'std::function<float (void)>::function<main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>,0>(_Fx)' being compiled
+          with
+          [
+              _Fx=main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>
+          ]
+  YoutubeOpenGL.vcxproj -> C:\Users\linus\CLionProjects\ee\Visual Studio Project\x64\Debug\Extended Essay Linus Lüchinger.exe

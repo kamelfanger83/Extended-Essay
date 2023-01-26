@@ -107,6 +107,8 @@ void drawBG(unsigned int shaderProgramBG, float* out_color) {
 
 int main() {
 
+	srand(time(NULL));
+
 	// Initialize GLFW
 	glfwInit();
 	// Tell GLFW what version of OpenGL we are using 
@@ -225,69 +227,190 @@ int main() {
 	};
 
 	State state;
-	// state constants
-	state.init_prey = 10;
-	state.init_pred = 10;
-	state.simulating = false;
-	state.sim_step_per_frame = 1;
-	state.sim_steps = 0;
-	state.frame_steps = 0;
+	State def_state;
+
+	def_state.init_prey = 1;
+	def_state.init_pred = 10;
+	def_state.simulating = false;
+	def_state.sim_step_per_frame = 1;
+	def_state.sim_steps = 0;
+	def_state.frame_steps = 0;
 
 	// prey constants
-	state.prey_size = 0.02f;
-	state.prey_speed = 0.01;
-	state.prey_see_range = 0.2;
+	def_state.prey_size = 0.02f;
+	def_state.prey_speed = 0.01;
+	def_state.prey_see_range = 0.1;
 
 	// predator constants
-	state.pred_size = 0.02f;
-	state.pred_speed = 0.02;
-	state.pred_see_range = 0.1;
-	state.idle_slow = 0.7;
-	state.idle_dir_c = 0.05;
-	state.energy_on = 5;
-	state.energy_mov = 0.01;
-	state.terretorial_range = 0.1;
-	state.init_scared = 20;
+	def_state.pred_size = 0.02f;
+	def_state.pred_speed = 0.02;
+	def_state.pred_see_range = 0.1;
+	def_state.idle_slow = 0.7;
+	def_state.idle_dir_c = 0.05;
+	def_state.energy_on = 5;
+	def_state.energy_mov = 0.01;
+	def_state.territorial_range = 0.1;
+	def_state.init_scared = 10;
 
 	// track constants
-	state.sample_wait = 100000; // wait some simulation ticks until hopefully equilibrium is established
-	state.sample_interval = 100;
-	state.sample_total = 1000;
-	state.tick = 0;
-	state.prey_eaten = 0;
-	state.sample_done = false;
-	state.wants_sampling = false;
-	state.wants_auto_sampling = false;
+	def_state.sample_wait = 10000; // wait some simulation ticks until hopefully equilibrium is established
+	def_state.sample_interval = 50;
+	def_state.sample_total = 100;
+	def_state.tick = 0;
+	def_state.prey_eaten = 0;
+	def_state.sample_done = false;
+	def_state.wants_sampling = false;
+	def_state.wants_auto_sampling = false;
+
+	state = def_state;
 
 	sendUniform();
 
 	std::list<std::shared_ptr<prey>> prey_vec;
 	std::list<std::shared_ptr<predator>> pred_vec;
 
+	int this_state_runs = 0;
+
+	std::function<float()> auto_step;
+
+	float progress = 0;
+
+	std::vector<experiment> experiments;
+
+	State experiment_start_temp = def_state;
+	experiment_start_temp.wants_auto_sampling = true;
+	experiment_start_temp.sim_step_per_frame = 10000;
+	//experiment_start_temp.simulating = true;
+
+	std::function<float()> experiment_step_temp = [&]() -> float {
+		if (this_state_runs++ == 10) {
+			this_state_runs = 0;
+			state.init_prey++;
+			if (state.init_prey == 300) return 1;
+		}
+		return ((float)state.init_prey * 10 + this_state_runs) / (300 * 10) ; // return progress
+	};
+
+	/*// PREY SEE RANGE EXPERIMENTS
+
+	experiment_start_temp.prey_see_range = 0.05;
+	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp)); // empty filename means no export
+	experiment_start_temp.prey_see_range = 0.1;
+	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp));
+	experiment_start_temp.prey_see_range = 0.15;
+	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp));
+	experiment_start_temp.prey_see_range = 0.2;
+	experiments.push_back(experiment("prey_vision.csv", experiment_start_temp, experiment_step_temp));
+
+	experiment_start_temp.prey_see_range = def_state.pred_see_range;
+
+	// territorial RANGE EXPERIMENTS
+
+	experiment_start_temp.territorial_range = 0.05;
+	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp)); // empty filename means no export
+	experiment_start_temp.territorial_range = 0.1;
+	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp));
+	experiment_start_temp.territorial_range = 0.15;
+	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp));
+	experiment_start_temp.territorial_range = 0.2;
+	experiments.push_back(experiment("predator_territorial.csv", experiment_start_temp, experiment_step_temp));
+
+	experiment_start_temp.territorial_range = def_state.territorial_range; 
+
+	// PREY SPEED EXPERIMENTS
+
+	experiment_start_temp.prey_speed = 0.005;
+	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp)); // empty filename means no export
+	experiment_start_temp.prey_speed = 0.01;
+	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp));
+	experiment_start_temp.prey_speed = 0.015;
+	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp));
+	experiment_start_temp.prey_speed = 0.02;
+	experiments.push_back(experiment("prey_speed.csv", experiment_start_temp, experiment_step_temp));
+
+	experiment_start_temp.prey_speed = def_state.prey_speed; 
+
+	// PREDATOR ENERGY EQUIVALENCE EXPERIMENTS
+
+	experiment_start_temp.energy_on = 1;
+	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp)); // empty filename means no export
+	experiment_start_temp.energy_on = 2;
+	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp));
+	experiment_start_temp.energy_on = 5;
+	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp));
+	experiment_start_temp.energy_on = 10;
+	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp));
+	experiment_start_temp.energy_on = 20;
+	experiments.push_back(experiment("energy_equivalence.csv", experiment_start_temp, experiment_step_temp));
+
+	experiment_start_temp.energy_on = def_state.energy_on;
+
+	// PREDATOR MOVE ENERGY EXPERIMENTS
+
+	experiment_start_temp.energy_mov = 0.005;
+	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp)); // empty filename means no export
+	experiment_start_temp.energy_mov = 0.01;
+	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp));
+	experiment_start_temp.energy_mov = 0.015;
+	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp));
+	experiment_start_temp.energy_mov = 0.02;
+	experiments.push_back(experiment("energy_move.csv", experiment_start_temp, experiment_step_temp));
+
+	experiment_start_temp.energy_mov = def_state.energy_mov; */
+
+	experiment_start_temp.init_scared = 5;
+	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp)); // empty filename means no export
+	experiment_start_temp.init_scared = 10;
+	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp));
+	experiment_start_temp.init_scared = 15;
+	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp));
+	experiment_start_temp.init_scared = 20;
+	experiments.push_back(experiment("scared_frames.csv", experiment_start_temp, experiment_step_temp));
+
+	experiment_start_temp.territorial_range = def_state.territorial_range;
+
+	int experiment_i = 0;
+
 	std::vector <attribute> attributes;
 	attributes.push_back(attribute("sample step", [&]() {return state.sample_step; })); // give how many samples we are into simulation
-	attributes.push_back(attribute("predation rate", [&]() {return  (float)state.prey_eaten / prey_vec.size(); })); // give predation rate
+	attributes.push_back(attribute("predation rate", [&]() {if (prey_vec.size() == 0) { return 0.0f; } else { return  (float)state.prey_eaten / prey_vec.size(); } })); // give predation rate
+	attributes.push_back(attribute("average prey eaten per predator", [&]() {if (pred_vec.size() == 0) { return 0.0f; } else { return (float)state.prey_eaten / pred_vec.size(); }})); // give average prey eaten per predator
 	attributes.push_back(attribute("prey population size", [&]() {return  (float)prey_vec.size(); })); // give prey population size
 	attributes.push_back(attribute("predator population size", [&]() {return  (float)pred_vec.size(); })); // give predator population size
-	
+	attributes.push_back(attribute("prey vision distance", [&]() {return state.prey_see_range; })); // add things we change in this experiment series
+	attributes.push_back(attribute("predator territorial range", [&]() {return state.territorial_range; })); // add things we change in this experiment series
+	attributes.push_back(attribute("prey speed", [&]() {return state.prey_speed; }));
+	attributes.push_back(attribute("energy equivalence", [&]() {return state.energy_on; }));
+	attributes.push_back(attribute("energy for moving", [&]() {return state.energy_mov; }));
+	attributes.push_back(attribute("predator scared frames", [&]() {return state.init_scared; }));
+
+
 	std::vector<std::vector<float>> samples;
 
-	auto auto_step = [&]() {
-		state.init_prey++;
-		if (state.init_prey == 100) return false;
-		return true;
-	}; // lambda for step for autosampling (similar to for loop around whole thing but not as ugly)
+	bool first_init = true;
 
 	auto init_sim = [&]() {
+
+		// init experiments and start simulation for first initiation
+		if (first_init) {
+			first_init = false;
+			if (state.wants_auto_sampling) {
+				experiment_i = 0;
+				state = experiments[experiment_i].start;
+				auto_step = experiments[experiment_i].step;
+			}
+		}
+
 		// generate fresh prey and predators
 		prey_vec.clear();
 		pred_vec.clear();
 		for (int prey_gen = 0; prey_gen < state.init_prey; prey_gen++) prey_vec.insert(prey_vec.end(), std::shared_ptr<prey>(new prey()));
 		for (int pred_gen = 0; pred_gen < state.init_pred; pred_gen++) pred_vec.insert(pred_vec.end(), std::shared_ptr<predator>(new predator(state)));
 
-		state.simulating = true;
+		// set state variables to start simualtion
 		state.sim_steps = 0;
 		state.frame_steps = 0;
+		state.simulating = true;
 
 		state.pre_sample_ticks = 0;
 		state.sample_step = 0;
@@ -295,8 +418,6 @@ int main() {
 
 		if(!state.wants_auto_sampling) samples.clear();
 	};
-
-	char fileName[100];
 
 	// Main while loop
 	while (!glfwWindowShouldClose(window)) {
@@ -309,14 +430,17 @@ int main() {
 		//SIMULATE
 
 		if (state.simulating) {
+			//std::cerr << "goodbye" << std::endl;
 			state.frame_steps += state.sim_step_per_frame;
 			while (state.sim_steps < state.frame_steps) {
-				state.sim_steps += 1;	
+				state.sim_steps += 1;
+				std::list<std::shared_ptr<predator>> npred_vec; // create copy where I insert ones that are still alive to prevent previously erased iterator issues when erasing dead ones in pred_vec
 				for (auto simulater = pred_vec.begin(); simulater != pred_vec.end(); simulater++) {
-					if ((*simulater)->step(prey_vec, pred_vec, simulater, state)) { // step returns true if predator dies
-						pred_vec.erase(simulater);
+					if (!(*simulater)->step(prey_vec, pred_vec, simulater, state)) { // step returns true if predator dies
+						npred_vec.insert(npred_vec.end(), *simulater);
 					}
 				}
+				pred_vec = npred_vec;
 
 				for (std::shared_ptr<prey> simulater : prey_vec) {
 					simulater->step(pred_vec, state);
@@ -343,9 +467,37 @@ int main() {
 							samples.push_back(this_sample);
 						}
 						else { // must be autosampling and sample_step = sample_total
-							if (!auto_step()) {
-								state.sample_done = true;
-								state.simulating = false;
+							progress = auto_step();
+
+							if (progress >= 1) {
+								if (experiments[experiment_i].fileName.size() > 0) {
+									std::ofstream outputFile(experiments[experiment_i].fileName, std::ios_base::out | std::ios_base::trunc);
+									for (int labels = 0; labels < attributes.size() - 1; labels++) {
+										outputFile << "\"" << attributes[labels].attribute_name << "\",";
+									}
+									outputFile << "\"" << attributes[attributes.size() - 1].attribute_name << "\"" << "\n";
+									for (auto line : samples) {
+										for (int i = 0; i < attributes.size() - 1; i++) {
+											outputFile << line[i] << ",";
+										}
+										outputFile << line[attributes.size() - 1] << "\n";
+									}
+									outputFile.close();
+									samples.clear();
+								}
+								
+								experiment_i++;
+								if (experiment_i == experiments.size()) {
+									state = def_state;
+								}
+
+								else {
+									state = experiments[experiment_i].start;
+									auto_step = experiments[experiment_i].step;
+									init_sim();
+								}
+
+								this_state_runs = 0;
 							} 
 							else init_sim();
 						}
@@ -355,6 +507,11 @@ int main() {
 						state.prey_eaten = 0;
 					}
 				}
+			}
+
+			if (state.frame_steps > 10000) { // probably uneccesary but reduce numerical imprecisions
+				state.frame_steps -= 10000;
+				state.sim_steps -= 10000;
 			}
 		}
 
@@ -480,6 +637,8 @@ int main() {
 
 		ImGui::TextWrapped("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
+		ImGui::End();
+
 		// Visual options menu
 		ImGui::Begin("Visual options");
 
@@ -498,50 +657,49 @@ int main() {
 		ImGui::End();
 
 		// Simulation menu
-		ImGui::Begin("Simulation options");
-		ImGui::SliderInt("Initial prey", &state.init_prey, 0, 100);
-		ImGui::SliderInt("Initial predators", &state.init_pred, 0, 100);
-		if (ImGui::Button("Initialize Simulation")) {
-			init_sim();
+		if (!(state.simulating && state.wants_auto_sampling)) {
+			ImGui::Begin("Simulation options");
+			if (ImGui::Button("Restore Defaults")) state = def_state;
+			ImGui::SliderInt("Initial prey", &state.init_prey, 0, 200);
+			ImGui::SliderInt("Initial predators", &state.init_pred, 0, 100);
+			if (ImGui::Button("Initialize Simulation")) {
+				init_sim();
+			}
+			if (ImGui::Button("Pause/Resume Simulation")) {
+				state.simulating = !state.simulating;
+			}
+
+			ImGui::Text("");
+
+			ImGui::SliderFloat("Prey speed", &state.prey_speed, 0.0f, 1.0f);
+			ImGui::SliderFloat("Prey vision range", &state.prey_see_range, 0.0f, 1.0f);
+
+			ImGui::Text("");
+
+			ImGui::SliderFloat("Predator speed", &state.pred_speed, 0.0f, 1.0f);
+			ImGui::SliderFloat("Predator vision range", &state.pred_see_range, 0.0f, 1.0f);
+			ImGui::SliderFloat("Predator idle speed %", &state.idle_slow, 0.0f, 1.0f);
+			ImGui::SliderFloat("Predator idle direction change", &state.idle_dir_c, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
+
+			ImGui::Text("");
+			ImGui::Text("Consuming one prey gives the predator 1 energy");
+			ImGui::SliderFloat("Predator energy equivalent", &state.energy_on, 0.0f, 20.0f);
+			ImGui::SliderFloat("Predator moving energy cost", &state.energy_mov, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
+
+			ImGui::Text("");
+			ImGui::SliderFloat("Predator territorial range", &state.territorial_range, 0.0f, 1.0f);
+			ImGui::SliderInt("Predator scared frames", &state.init_scared, 0, 100);
+
+			ImGui::Text("");
+
+			float o_sim_step_per_frame = state.sim_step_per_frame;
+			ImGui::SliderFloat("Simulation steps per frame", &state.sim_step_per_frame, 0.0f, 2000.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
+			if (o_sim_step_per_frame != state.sim_step_per_frame) {
+				state.sim_steps = 0; state.frame_steps = 0;
+			}
+
+			ImGui::End();
 		}
-		if (ImGui::Button("Pause Simulation")) {
-			state.simulating = false;
-		}
-		if (ImGui::Button("Resume simulation")) {
-			state.simulating = true;
-		}
-
-		ImGui::Text("");
-
-
-		ImGui::SliderFloat("Prey speed", &state.prey_speed, 0.0f, 1.0f);
-		ImGui::SliderFloat("Prey vision range", &state.prey_see_range, 0.0f, 1.0f);
-
-		ImGui::Text("");
-
-		ImGui::SliderFloat("Predator speed", &state.pred_speed, 0.0f, 1.0f);
-		ImGui::SliderFloat("Predator vision range", &state.pred_see_range, 0.0f, 1.0f);
-		ImGui::SliderFloat("Predator idle speed %", &state.idle_slow, 0.0f, 1.0f);
-		ImGui::SliderFloat("Predator idle direction change", &state.idle_dir_c, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
-
-		ImGui::Text("");
-		ImGui::Text("Consuming one prey gives the predator 1 energy");
-		ImGui::SliderFloat("Predator energy equivalent", &state.energy_on, 0.0f, 20.0f);
-		ImGui::SliderFloat("Predator moving energy cost", &state.energy_mov, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
-
-		ImGui::Text("");
-		ImGui::SliderFloat("Predator terretorial range", &state.terretorial_range, 0.0f, 1.0f);
-		ImGui::SliderInt("Predator scared frames", &state.init_scared, 0, 100);
-
-		ImGui::Text("");
-
-		float o_sim_step_per_frame = state.sim_step_per_frame;
-		ImGui::SliderFloat("Simulation steps per frame", &state.sim_step_per_frame, 0.0f, 2000.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
-		if (o_sim_step_per_frame != state.sim_step_per_frame) {
-			state.sim_steps = 0; state.frame_steps = 0;
-		}
-
-		ImGui::End();
 
 		sendUniform();
 
@@ -553,6 +711,11 @@ int main() {
 		ImGui::Text("");
 
 		ImGui::SliderInt("Frames per sample", &state.sample_interval, 1, 1000, "%d", ImGuiSliderFlags_Logarithmic);
+
+		ImGui::Text("");
+
+		ImGui::Text("Progress: working on %d experiment out of %d", experiment_i + 1, experiments.size());
+		ImGui::Text("Progress in current experiment: %3f", (double)progress * 100);
 
 		ImGui::Text("");
 
@@ -568,29 +731,6 @@ int main() {
 		}
 
 		ImGui::End();
-
-		if (state.sample_done) {
-			ImGui::Begin("Export");
-
-			ImGui::InputText("Enter filename for export", fileName, 100);
-
-			if (ImGui::Button("Export samples") && !samples.empty()) {
-				std::ofstream outputFile (fileName, std::ios_base::out | std::ios_base::trunc);
-				for (int labels = 0; labels < attributes.size()-1; labels++){
-					outputFile << "\"" << attributes[labels].attribute_name << "\",";
-				}
-				outputFile << "\"" << attributes[attributes.size()-1].attribute_name << "\"" <<"\n";
-				for (auto line : samples) {
-					for (int i = 0; i < attributes.size()-1; i++){
-						outputFile << line[i] << ",";
-					}
-					outputFile << line[attributes.size()-1] << "\n";
-				}
-				outputFile.close();
-			}
-
-			ImGui::End();
-		}
 
 		// Renders the ImGUI elements
 		ImGui::Render();

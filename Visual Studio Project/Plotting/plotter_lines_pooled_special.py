@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as stats
 
-path = ".plots/exp"
+path = ".\\plots/exp"
 
 plots = [ #dependent, axis name, split, infile, title, outfile
     ["predation rate", "Predation rate normalized", "predator territorial range", "predator_territorial.csv", "Comparison of inverse density dependence", "territorial_ranges_experiment_PR_normal.png"],
@@ -81,8 +81,11 @@ for plot in plots:
         error = error / highest
 
 
-        # plot x/y with using error as error
-        plt.errorbar(x, y, yerr=error, label=tlabel)
+        # plot x/y
+        plt.errorbar(x, y, label=tlabel)
+
+        # shade error
+        plt.fill_between(x, y-error, y+error, alpha=0.2)
 
 
 
@@ -92,5 +95,7 @@ for plot in plots:
 
     plt.xticks(np.arange(minx-1, maxx+2, 50))
 
-    plt.savefig(path + "\\" + plot[5])
+    plt.tight_layout()
+
+    plt.savefig(path + "/" + plot[5])
     plt.show()

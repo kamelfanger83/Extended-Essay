@@ -22,7 +22,7 @@ struct State {
 	float idle_dir_c;
 	float energy_on;
 	float energy_mov;
-	float terretorial_range;
+	float territorial_range;
 	int init_scared;
 	// eating always gives 1 energy
 
@@ -44,6 +44,13 @@ struct attribute {
 	std::string attribute_name;
 	std::function<float()> get;
 	attribute(std::string attribute_name, std::function<float()> get) : attribute_name(attribute_name), get(get) {}
+};
+
+struct experiment {
+	std::string fileName;
+	State start;
+	std::function<float()> step;
+	experiment(std::string fileName, State start, std::function<float()> step) : fileName(fileName), start(start), step(step) {}
 };
 
 #endif // !D_CONSTANTS

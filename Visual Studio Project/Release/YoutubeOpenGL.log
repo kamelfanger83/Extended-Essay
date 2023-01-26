@@ -1,0 +1,201 @@
+﻿  animals.cpp
+  imgui.cpp
+  imgui_demo.cpp
+  imgui_draw.cpp
+  imgui_impl_glfw.cpp
+  imgui_impl_opengl3.cpp
+  imgui_tables.cpp
+  imgui_widgets.cpp
+  Main.cpp
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(110,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(241,29): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(242,32): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(246,29): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(247,32): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(248,27): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(249,29): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(251,29): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(252,35): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(322,42): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(324,41): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(326,42): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(328,41): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(350,42): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(352,41): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(354,42): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(356,41): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(463,38): warning C4018: '<': signed/unsigned mismatch
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(468,29): warning C4018: '<': signed/unsigned mismatch
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(516,25): warning C4018: '<': signed/unsigned mismatch
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(526,25): warning C4018: '<': signed/unsigned mismatch
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(538,25): warning C4018: '<': signed/unsigned mismatch
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(547,25): warning C4018: '<': signed/unsigned mismatch
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(711,37): warning C4018: '<': signed/unsigned mismatch
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(753,27): warning C4244: 'return': conversion from 'int' to '_Rx', possible loss of data
+          with
+          [
+              _Rx=float
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(919): message : see reference to function template instantiation '_Rx std::_Invoker_ret<_Rx,false>::_Call<_Callable&,>(_Fx) noexcept(false)' being compiled
+          with
+          [
+              _Rx=float,
+              _Callable=main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>,
+              _Fx=main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e> &
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(920): message : see reference to function template instantiation '_Rx std::_Invoker_ret<_Rx,false>::_Call<_Callable&,>(_Fx) noexcept(false)' being compiled
+          with
+          [
+              _Rx=float,
+              _Callable=main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>,
+              _Fx=main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e> &
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(919): message : while compiling class template member function '_Rx std::_Func_impl_no_alloc<main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>,_Rx>::_Do_call(void)'
+          with
+          [
+              _Rx=float
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(813): message : see reference to class template instantiation 'std::_Func_impl_no_alloc<main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>,_Ret>' being compiled
+          with
+          [
+              _Ret=float
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(1010): message : see reference to variable template 'const bool _Is_large<std::_Func_impl_no_alloc<<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>,float> >' being compiled
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(1143): message : see reference to function template instantiation 'void std::_Func_class<_Ret>::_Reset<main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>>(_Fx &&)' being compiled
+          with
+          [
+              _Ret=float,
+              _Fx=main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(1143): message : see reference to function template instantiation 'void std::_Func_class<_Ret>::_Reset<main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>>(_Fx &&)' being compiled
+          with
+          [
+              _Ret=float,
+              _Fx=main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>
+          ]
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(364): message : see reference to function template instantiation 'std::function<float (void)>::function<main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>,0>(_Fx)' being compiled
+          with
+          [
+              _Fx=main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>
+          ]
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(364): message : see reference to function template instantiation 'std::function<float (void)>::function<main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>,0>(_Fx)' being compiled
+          with
+          [
+              _Fx=main::<lambda_e9a4686c4fe9657ac0b81be1d61ffc4e>
+          ]
+  utils.cpp
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\utils.cpp(11,13): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\utility(193,16): warning C4244: 'initializing': conversion from '_Ty' to '_Ty1', possible loss of data
+          with
+          [
+              _Ty=int
+          ]
+          and
+          [
+              _Ty1=float
+          ]
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\utils.cpp(20): message : see reference to function template instantiation 'std::pair<float,float>::pair<int,int,0>(_Other1 &&,_Other2 &&) noexcept' being compiled
+          with
+          [
+              _Other1=int,
+              _Other2=int
+          ]
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\utils.cpp(20): message : see reference to function template instantiation 'std::pair<float,float>::pair<int,int,0>(_Other1 &&,_Other2 &&) noexcept' being compiled
+          with
+          [
+              _Other1=int,
+              _Other2=int
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\utility(193,54): warning C4244: 'initializing': conversion from '_Ty' to '_Ty2', possible loss of data
+          with
+          [
+              _Ty=int
+          ]
+          and
+          [
+              _Ty2=float
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\utility(193,16): warning C4244: 'initializing': conversion from '_Ty' to '_Ty1', possible loss of data
+          with
+          [
+              _Ty=double
+          ]
+          and
+          [
+              _Ty1=float
+          ]
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\utils.cpp(25): message : see reference to function template instantiation 'std::pair<float,float>::pair<double,double,0>(_Other1 &&,_Other2 &&) noexcept' being compiled
+          with
+          [
+              _Other1=double,
+              _Other2=double
+          ]
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\utils.cpp(25): message : see reference to function template instantiation 'std::pair<float,float>::pair<double,double,0>(_Other1 &&,_Other2 &&) noexcept' being compiled
+          with
+          [
+              _Other1=double,
+              _Other2=double
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\utility(193,54): warning C4244: 'initializing': conversion from '_Ty' to '_Ty2', possible loss of data
+          with
+          [
+              _Ty=double
+          ]
+          and
+          [
+              _Ty2=float
+          ]
+  glad.c
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSwapBuffers
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSwapInterval
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwGetClipboardString
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwGetInputMode
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwGetWindowAttrib
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwGetTime
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwCreateWindowSurface
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwGetVideoMode
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSetMonitorCallback
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwGetFramebufferSize
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSetClipboardString
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwFocusWindow
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSetCursorEnterCallback
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwGetWindowSize
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSetMouseButtonCallback
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSetCursor
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwDestroyCursor
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSetKeyCallback
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSetScrollCallback
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwCreateWindow
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwWindowHint
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSetInputMode
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwMakeContextCurrent
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwShowWindow
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwCreateStandardCursor
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSetWindowCloseCallback
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwGetMonitors
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSetCursorPos
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwGetWindowPos
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwGetMonitorWorkarea
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwDestroyWindow
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwGetWin32Window
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSetWindowPosCallback
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwGetGamepadState
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSetWindowTitle
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwGetMonitorPos
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSetCursorPosCallback
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwGetKeyName
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwGetCursorPos
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSetWindowFocusCallback
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSetWindowSizeCallback
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSetWindowSize
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSetErrorCallback
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSetWindowOpacity
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSetCharCallback
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwSetWindowPos
+imgui_impl_glfw.obj : error LNK2001: unresolved external symbol _glfwGetMonitorContentScale
+Main.obj : error LNK2001: unresolved external symbol _glfwTerminate
+Main.obj : error LNK2001: unresolved external symbol _glfwGetCurrentContext
+Main.obj : error LNK2001: unresolved external symbol _glfwPollEvents
+Main.obj : error LNK2001: unresolved external symbol _glfwInit
+Main.obj : error LNK2001: unresolved external symbol _glfwWindowShouldClose
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Release\Extended Essay Linus Lüchinger.exe : fatal error LNK1120: 52 unresolved externals

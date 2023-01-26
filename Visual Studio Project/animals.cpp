@@ -105,7 +105,7 @@ bool predator::step(std::list<std::shared_ptr<prey>>& prey_vec, std::list<std::s
 
 		vec2f dvec = (*pred_nearest)->pos - pos;
 
-		if (len(dvec) < state.terretorial_range) {
+		if (len(dvec) < state.territorial_range) {
 			energy -= state.energy_mov;
 			dvec = norm(dvec, state.pred_speed);
 			pos = pos - dvec;

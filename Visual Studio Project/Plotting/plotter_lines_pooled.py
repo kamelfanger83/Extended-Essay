@@ -25,8 +25,17 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
 path = ".\\plots"
 
 plots = [ #dependent, axis name, split, infile, title, outfile
-    ["predation rate", "Predation rate", "energy for moving", "energy_move.csv", "Comparison of energy costs for movement", "move_energy_experiment_PR.png"]]#,
-"""    ["predator population size", "Predator population size", "energy for moving", "energy_move.csv", "Comparison of energy costs for movement", "move_energy_experiment_NR.png"],
+    ["predation rate", "Predation rate", "predator scared frames", "scared_frames.csv", "Comparison of duration territorial conflicts", "scared_frames_experiment_PR.png"],
+    ["predator population size", "Numerical response", "predator scared frames", "scared_frames.csv", "Comparison of duration territorial conflicts", "scared_frames_experiment_NR.png"],
+    ["average prey eaten per predator", "Functional response", "predator scared frames", "scared_frames.csv", "Comparison of duration territorial conflicts", "scared_frames_experiment_FR.png"],
+
+    ["predation rate", "Predation rate", "predator territorial range", "predator_territorial.csv", "Comparison of predator territorial ranges", "territorial_ranges_experiment_PR.png"],
+    ["predator population size", "Numerical response", "predator territorial range", "predator_territorial.csv", "Comparison of predator territorial ranges", "territorial_ranges_experiment_NR.png"],
+    ["average prey eaten per predator", "Functional response", "predator territorial range", "predator_territorial.csv", "Comparison of predator territorial ranges", "territorial_ranges_experiment_FR.png"]
+]
+"""
+    ["predation rate", "Predation rate", "energy for moving", "energy_move.csv", "Comparison of energy costs for movement", "move_energy_experiment_PR.png"],
+    ["predator population size", "Predator population size", "energy for moving", "energy_move.csv", "Comparison of energy costs for movement", "move_energy_experiment_NR.png"],
     ["average prey eaten per predator", "Average prey eaten per predator", "energy for moving", "energy_move.csv", "Comparison of energy costs for movement", "move_energy_experiment_FR.png"],
 
     ["predation rate", "Predation rate", "energy equivalence", "energy_equivalence.csv", "Comparison of energy costs for reproduction", "reproduction_energy_experiment_PR.png"],
@@ -40,10 +49,6 @@ plots = [ #dependent, axis name, split, infile, title, outfile
     ["predation rate", "Predation rate", "prey vision distance", "prey_vision.csv", "Comparison of prey vision ranges", "prey_vision_experiment_PR.png"],
     ["predator population size", "Predator population size", "prey vision distance", "prey_vision.csv", "Comparison of prey vision ranges", "prey_vision_experiment_NR.png"],
     ["average prey eaten per predator", "Average prey eaten per predator", "prey vision distance", "prey_vision.csv", "Comparison of prey vision ranges", "prey_vision_experiment_FR.png"],
-
-    ["predation rate", "Predation rate", "predator territorial range", "predator_territorial.csv", "Comparison of predator territorial ranges", "territorial_ranges_experiment_PR.png"],
-    ["predator population size", "Predator population size", "predator territorial range", "predator_territorial.csv", "Comparison of predator territorial ranges", "territorial_ranges_experiment_NR.png"],
-    ["average prey eaten per predator", "Average prey eaten per predator", "predator territorial range", "predator_territorial.csv", "Comparison of predator territorial ranges", "territorial_ranges_experiment_FR.png"]
 ]"""
 
 for plot in plots:
@@ -67,14 +72,18 @@ for plot in plots:
 
     splits = {}
 
+    tgroup = []
     for sample in data: #is name here?
         tl = str(sample).split(",")
         tsplit = float(tl[s_i])
         if(tsplit not in splits): splits[tsplit] = {}
         key = float(tl[indp_i])
         if(key not in splits[tsplit]): splits[tsplit][key] = []
-        now = splits[tsplit][key]
-        splits[tsplit][key].append(float(tl[dp_i]))
+        tgroup.append(float(tl[dp_i]))
+        if(len(tgroup) == 99):
+            tgroup = np.array(tgroup)
+            splits[tsplit][key].append(np.mean(tgroup))
+            tgroup = []
 
     l_xpoints_ls = []
     l_ypoints_ls = []
@@ -91,10 +100,11 @@ for plot in plots:
         labels.append(values_i)
         for creater in values:
             l_xpoints_ls[-1].append(creater)
-            # put average in ypoints and lowest 5% and highest 5% in low/high errors
+            # put average in ypoints and 95% confidence interval in errors
             l_ypoints_ls[-1].append(np.mean(values[creater]))
-            l_low_errors_ls[-1].append(np.percentile(values[creater], 22))
-            l_high_errors_ls[-1].append(np.percentile(values[creater], 78))
+            l_low_errors_ls[-1].append(np.mean(values[creater]) - 1.96*np.std(values[creater])/np.sqrt(len(values[creater])))
+            l_high_errors_ls[-1].append(np.mean(values[creater]) + 1.96*np.std(values[creater])/np.sqrt(len(values[creater])))
+            print(np.sqrt(len(values[creater])))
 
 
     minx = 10**10
@@ -124,6 +134,8 @@ for plot in plots:
     plt.legend()
 
     plt.xticks(np.arange(minx-1, maxx+2, 50))
+
+    plt.tight_layout()
 
     plt.savefig(path + "\\" + plot[5])
     plt.show()
