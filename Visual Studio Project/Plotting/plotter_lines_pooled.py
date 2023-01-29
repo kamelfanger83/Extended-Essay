@@ -120,10 +120,10 @@ for plot in plots:
         low_error = np.array(low_error)
         high_error = np.array(high_error)
 
-        plt.plot(x, y, "-", label=tlabel)
+        plt.plot(x, y, "-", label=tlabel, linewidth=1)
 
         #plot error around with fill_between
-        plt.fill_between(x, low_error, high_error, alpha=0.2)
+        plt.fill_between(x, low_error, high_error, alpha=0.4)
 
         """yhat = savitzky_golay(y, 51, 3) # window size 51, polynomial order 3
         yhat = np.maximum(yhat, 0)

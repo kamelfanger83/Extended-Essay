@@ -3,11 +3,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as stats
 
-path = ".\\plots/exp"
+path = "./plots"
 
 plots = [ #dependent, axis name, split, infile, title, outfile
-    ["predation rate", "Predation rate normalized", "predator territorial range", "predator_territorial.csv", "Comparison of inverse density dependence", "territorial_ranges_experiment_PR_normal.png"],
-    ["predation rate", "Predation rate normalized", "predator scared frames", "scared_frames.csv", "Comparison of duration of territoriality", "scared_frames_experiment_PR_normal.png"],
+    ["predation rate", "Predation rate normalized", "predator territorial range", "predator_territorial.csv", "Comparison of density dependence between $territorial\_range$s", "territorial_ranges_experiment_PR_normal.png"],
+    ["predation rate", "Predation rate normalized", "predator scared frames", "scared_frames.csv", "Comparison of density dependence between $territorial\_duration$s", "scared_frames_experiment_PR_normal.png"],
 ]
 
 for plot in plots:
@@ -59,10 +59,10 @@ for plot in plots:
         labels.append(values_i)
         for creater in values:
             l_xpoints_ls[-1].append(creater)
-            # put average in ypoints and standard error in error
+            # put average in ypoints and 95% confidence interval in errors
             l_ypoints_ls[-1].append(np.mean(values[creater]))
             if l_ypoints_ls[-1][-1] > l_highest[-1]: l_highest[-1] = l_ypoints_ls[-1][-1]
-            l_error_ls[-1].append(stats.sem(values[creater]))
+            l_error_ls[-1].append(np.std(values[creater])*1.96/np.sqrt(len(values[creater])))
 
     minx = 10**10
     maxx = 0
@@ -82,10 +82,10 @@ for plot in plots:
 
 
         # plot x/y
-        plt.errorbar(x, y, label=tlabel)
+        plt.plot(x, y, label=tlabel, linewidth=1)
 
         # shade error
-        plt.fill_between(x, y-error, y+error, alpha=0.2)
+        plt.fill_between(x, y-error, y+error, alpha=0.4)
 
 
 
