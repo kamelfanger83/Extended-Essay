@@ -89,7 +89,7 @@ for plot in plots:
 
 
 
-    plt.xlabel("Prey population size")
+    plt.xlabel("Prey density")
     plt.ylabel(plot[1])
     plt.legend()
 

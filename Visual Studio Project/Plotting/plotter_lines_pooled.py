@@ -129,7 +129,7 @@ for plot in plots:
         yhat = np.maximum(yhat, 0)
         plt.plot(x,yhat, color='red')"""
 
-    plt.xlabel("Prey population size")
+    plt.xlabel("Prey density")
     plt.ylabel(plot[1])
     plt.legend()
 
