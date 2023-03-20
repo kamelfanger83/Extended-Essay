@@ -8,7 +8,6 @@
 
 #include <vector>
 #include <memory>
-#include <list>
 #include <functional>
 #include <cmath>
 #include <fstream>
@@ -16,10 +15,11 @@
 #include "state.h"
 #include "animals.h"
 #include "utils.h"
+#include "mouse.h"
 
 
-// Vertex Shader for animals source code
-const char* vertexShaderAnimalSource = "#version 330 core\n"
+// Vertex Shader
+const char* vertexShaderSource = "#version 330 core\n"
 "layout (location = 0) in vec2 aPos;\n"
 "uniform vec3 zoom;\n" //0,1 : x,y of center, 2: side/2
 "void main()\n"
@@ -29,80 +29,81 @@ const char* vertexShaderAnimalSource = "#version 330 core\n"
 "   gl_Position = vec4(x, y, 0, 1.0);\n"
 "}\0";
 
-//Fragment Shader for prey source code
-const char* fragmentShaderPreySource = "#version 330 core\n"
+//Fragment Shader
+const char* fragmentShaderSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
-"uniform vec4 prey_color;\n"
+"uniform vec4 color;\n"
 "void main()\n"
 "{\n"
-"   FragColor = prey_color;\n"
+"   FragColor = color;\n"
 "}\n\0";
 
-//Fragment Shader for predators source code
-const char* fragmentShaderPredSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"uniform vec4 pred_color;\n"
-"void main()\n"
-"{\n"
-"   FragColor = pred_color;\n"
-"}\n\0";
+void drawCircle(unsigned int shaderProgram, unsigned int colorLocation, float x, float y, float r, float* color) {
+	unsigned int VBOBG = 0, VAOBG = 0;
+	
+	const int corn_circ = 100;
+	float vertices[2 * corn_circ];
 
-// Vertex Shader for background source code
-const char* vertexShaderBGSource = "#version 330 core\n"
-"layout (location = 0) in vec2 aPos;\n"
-"uniform vec3 zoom;\n" //0,1 : x,y of center, 2: side/2
-"void main()\n"
-"{\n"
-"	float x = (aPos.x - zoom.x)/zoom.z;\n"
-"	float y = (aPos.y - zoom.y)/zoom.z;\n"
-"   gl_Position = vec4(x, y, 0, 1.0);\n"
-"}\0";
+	for (int circler = 0; circler < corn_circ; circler++) {
+        float ang = 2.0f * PI / corn_circ * circler;
+        vertices[circler * 2] = x + r * cos(ang);
+        vertices[circler * 2 + 1] = y + r * sin(ang);
+    }
 
-//Fragment Shader for background source code
-const char* fragmentShaderBGSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"uniform vec4 bg_color;\n"
-"void main()\n"
-"{\n"
-"   FragColor = bg_color;\n"
-"}\n\0";
+    glGenBuffers(1, &VBOBG);
+    glBindBuffer(GL_ARRAY_BUFFER, VBOBG);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * corn_circ, vertices, GL_STATIC_DRAW);
 
-void drawBG(unsigned int shaderProgramBG, float* out_color) {
+    glGenVertexArrays(1, &VAOBG);
+    glBindVertexArray(VAOBG);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBOBG);
+    glBindVertexArray(VAOBG);
+
+    glUseProgram(shaderProgram);
+    glUniform4f(colorLocation, color[0], color[1], color[2], color[3]);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 100);
+
+    glDeleteBuffers(1, &VBOBG);
+    glDeleteVertexArrays(1, &VAOBG);
+}
+
+void drawBG(unsigned int shaderProgram, unsigned int colorLocation, float* bg_color, float* out_color) {
 
 	// Specify the color of the background
 	glClearColor(out_color[0], out_color[1], out_color[2], out_color[3]);
 	// Clean the back buffer and assign the new color to it
 	glClear(GL_COLOR_BUFFER_BIT);
 
-#define corn_circ 100
+	static unsigned int VBOBG = 0, VAOBG = 0;
 
-	float bg_vertices[2 * corn_circ];
+	if (VBOBG == 0) {
+		const int corn_circ = 100;
+		float bg_vertices[2 * corn_circ];
 
-	for (int circler = 0; circler < corn_circ; circler++) {
-		float ang = 2.0f * PI / corn_circ * circler;
-		bg_vertices[circler * 2] = cos(ang);
-		bg_vertices[circler * 2 + 1] = sin(ang);
+		for (int circler = 0; circler < corn_circ; circler++) {
+			float ang = 2.0f * PI / corn_circ * circler;
+			bg_vertices[circler * 2] = cos(ang);
+			bg_vertices[circler * 2 + 1] = sin(ang);
+		}
+
+		glGenBuffers(1, &VBOBG);
+		glBindBuffer(GL_ARRAY_BUFFER, VBOBG);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(bg_vertices), bg_vertices, GL_STATIC_DRAW);
+
+		glGenVertexArrays(1, &VAOBG);
+		glBindVertexArray(VAOBG);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
 	}
-
-	unsigned int VBOBG, VAOBG;
-	glGenBuffers(1, &VBOBG);
-	glGenVertexArrays(1, &VAOBG);
 
 	glBindVertexArray(VAOBG);
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBOBG);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(bg_vertices), bg_vertices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glUseProgram(shaderProgramBG);
-
-	glDrawArrays(GL_TRIANGLE_FAN, 0, corn_circ);
-
-	glDeleteBuffers(1, &VBOBG);
-	glDeleteVertexArrays(1, &VAOBG);
+	glUseProgram(shaderProgram);
+	glUniform4f(colorLocation, bg_color[0], bg_color[1], bg_color[2], bg_color[3]);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 100);
 }
 
 int main() {
@@ -119,7 +120,7 @@ int main() {
 	// So that means we only have the modern functions
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	// Create a GLFWwindow object of 800 by 800 pixels, naming it "YoutubeOpenGL"
+	// Create a GLFWwindow object of 800 by 800 pixels, naming it "Simulation window"
 	GLFWwindow* window = glfwCreateWindow(800, 800, "Simulation window", NULL, NULL);
 	// Error check if the window fails to create
 	if (window == NULL)
@@ -148,51 +149,46 @@ int main() {
 		}
 	};
 
-	auto createProgram = [&](const char* sourceVertex, const char* sourceFragment) -> unsigned int { // helper lambda to create shader programs froum source code of shaders
-		// Create Vertex Shader Object and get its reference
-		unsigned int localVertex = glCreateShader(GL_VERTEX_SHADER);
-		// Attach Vertex Shader source to the Vertex Shader Object
-		glShaderSource(localVertex, 1, &sourceVertex, NULL);
-		// Compile the Vertex Shader into machine code
-		glCompileShader(localVertex);
+	// Create Vertex Shader Object and get its reference
+	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	// Attach Vertex Shader source to the Vertex Shader Object
+	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+	// Compile the Vertex Shader into machine code
+	glCompileShader(vertexShader);
 
-		checkShaderSuccess(localVertex);
+	checkShaderSuccess(vertexShader);
 
-		// Create Fragment Shader Object and get its reference
-		unsigned int localFragment = glCreateShader(GL_FRAGMENT_SHADER);
-		// Attach Fragment Shader source to the Vertex Shader Object
-		glShaderSource(localFragment, 1, &sourceFragment, NULL);
-		// Compile the Fragment Shader into machine code
-		glCompileShader(localFragment);
+	// Create Fragment Shader Object and get its reference
+	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	// Attach Fragment Shader source to the Vertex Shader Object
+	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+	// Compile the Fragment Shader into machine code
+	glCompileShader(fragmentShader);
 
-		checkShaderSuccess(localFragment);
+	checkShaderSuccess(fragmentShader);
 
-		// create program an attach shaders to it
-		unsigned int localProgram = glCreateProgram();
-		glAttachShader(localProgram, localVertex);
-		glAttachShader(localProgram, localFragment);
+	// create program an attach shaders to it
+	unsigned int shaderProgram = glCreateProgram();
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
 
-		glLinkProgram(localProgram);
+	glLinkProgram(shaderProgram);
 
-		glDeleteShader(localVertex);
-		glDeleteShader(localFragment);
-
-		return localProgram;
-	};
-
-	// Create Shader Programs
-	unsigned int prey_shaderProgram = createProgram(vertexShaderAnimalSource, fragmentShaderPreySource);
-	unsigned int pred_shaderProgram = createProgram(vertexShaderAnimalSource, fragmentShaderPredSource);
-	unsigned int shaderProgramBG = createProgram(vertexShaderBGSource, fragmentShaderBGSource);
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
 
 	// Get locations of uniforms in linked shader programs
-	unsigned int prey_zoomLocation = glGetUniformLocation(prey_shaderProgram, "zoom");
-	unsigned int pred_zoomLocation = glGetUniformLocation(pred_shaderProgram, "zoom");
-	unsigned int zoomLocationBG = glGetUniformLocation(shaderProgramBG, "zoom");
+	unsigned int zoomLocation = glGetUniformLocation(shaderProgram, "zoom");
 
-	unsigned int prey_colorLocation = glGetUniformLocation(prey_shaderProgram, "prey_color");
-	unsigned int pred_colorLocation = glGetUniformLocation(pred_shaderProgram, "pred_color");
-	unsigned int bgcolorLocationBG = glGetUniformLocation(shaderProgramBG, "bg_color");
+	unsigned int colorLocation = glGetUniformLocation(shaderProgram, "color");
+
+	if (colorLocation == -1) {
+		std::cout << "Error: Could not find location of uniform variable 'color' in shader program" << std::endl;
+	}
+
+	// Enable blending
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Initialize ImGUI
 	IMGUI_CHECKVERSION();
@@ -207,34 +203,23 @@ int main() {
 	ImGui_ImplOpenGL3_Init("#version 330");
 
 	// Variables to be changed in the ImGUI window
-	bool drawTriangle = true;
-	float zoom[3] = { 0.0f, 0.0f, 1.0f };
 	float prey_color[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
 	float pred_color[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
 	float bg_color[4] = { 0.07f, 0.13f, 0.17f, 1.0f };
 	float out_color[4] = { 0.4f, 0.13f, 0.17f, 1.0f };
-
-	auto sendUniform = [&]() {
-		glUseProgram(prey_shaderProgram);
-		glUniform3f(prey_zoomLocation, zoom[0], zoom[1], zoom[2]);
-		glUniform4f(prey_colorLocation, prey_color[0], prey_color[1], prey_color[2], prey_color[3]);
-		glUseProgram(pred_shaderProgram);
-		glUniform3f(pred_zoomLocation, zoom[0], zoom[1], zoom[2]);
-		glUniform4f(pred_colorLocation, pred_color[0], pred_color[1], pred_color[2], pred_color[3]);
-		glUseProgram(shaderProgramBG);
-		glUniform3f(zoomLocationBG, zoom[0], zoom[1], zoom[2]);
-		glUniform4f(bgcolorLocationBG, bg_color[0], bg_color[1], bg_color[2], bg_color[3]);
-	};
+	float range_color[4] = { 0.8f, 0.2f, 0.6f, 0.2f };
+	float territory_color[4] = { 1.0f, 0.38f, 0.00f, 0.3f };
 
 	State state;
 	State def_state;
 
-	def_state.init_prey = 1;
+	def_state.init_prey = 40;
 	def_state.init_pred = 10;
 	def_state.simulating = false;
 	def_state.sim_step_per_frame = 1;
 	def_state.sim_steps = 0;
 	def_state.frame_steps = 0;
+	def_state.dt = 0.1;
 
 	// prey constants
 	def_state.prey_size = 0.02f;
@@ -252,7 +237,7 @@ int main() {
 	def_state.territorial_range = 0.1;
 	def_state.init_scared = 10;
 
-	// track constants
+	// sampling constants
 	def_state.sample_wait = 10000; // wait some simulation ticks until hopefully equilibrium is established
 	def_state.sample_interval = 50;
 	def_state.sample_total = 100;
@@ -262,12 +247,20 @@ int main() {
 	def_state.wants_sampling = false;
 	def_state.wants_auto_sampling = false;
 
+	// tracking variables
+	def_state.tracking = NULL;
+
+	// visual variables
+	def_state.zoom = new float[3] { 0.0f, 0.0f, 1.1f };
+
+	glUseProgram(shaderProgram);
+	glUniform3f(zoomLocation, def_state.zoom[0], def_state.zoom[1], def_state.zoom[2]);
+
 	state = def_state;
 
-	sendUniform();
+	Mouse::init(state);
 
-	std::list<std::shared_ptr<prey>> prey_vec;
-	std::list<std::shared_ptr<predator>> pred_vec;
+	glfwSetMouseButtonCallback(window, Mouse::mouse_button_callback);
 
 	int this_state_runs = 0;
 
@@ -356,7 +349,7 @@ int main() {
 	experiment_start_temp.energy_mov = 0.02;
 	experiments.push_back(experiment("energy_move.csv", experiment_start_temp, experiment_step_temp));
 
-	experiment_start_temp.energy_mov = def_state.energy_mov; */
+	experiment_start_temp.energy_mov = def_state.energy_mov; 
 
 	experiment_start_temp.init_scared = 5;
 	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp)); // empty filename means no export
@@ -365,24 +358,27 @@ int main() {
 	experiment_start_temp.init_scared = 15;
 	experiments.push_back(experiment("", experiment_start_temp, experiment_step_temp));
 	experiment_start_temp.init_scared = 20;
-	experiments.push_back(experiment("scared_frames.csv", experiment_start_temp, experiment_step_temp));
+	experiments.push_back(experiment("scared_frames.csv", experiment_start_temp, experiment_step_temp)); */
 
 	experiment_start_temp.territorial_range = def_state.territorial_range;
 
 	int experiment_i = 0;
 
 	std::vector <attribute> attributes;
-	attributes.push_back(attribute("sample step", [&]() {return state.sample_step; })); // give how many samples we are into simulation
-	attributes.push_back(attribute("predation rate", [&]() {if (prey_vec.size() == 0) { return 0.0f; } else { return  (float)state.prey_eaten / prey_vec.size(); } })); // give predation rate
-	attributes.push_back(attribute("average prey eaten per predator", [&]() {if (pred_vec.size() == 0) { return 0.0f; } else { return (float)state.prey_eaten / pred_vec.size(); }})); // give average prey eaten per predator
-	attributes.push_back(attribute("prey population size", [&]() {return  (float)prey_vec.size(); })); // give prey population size
-	attributes.push_back(attribute("predator population size", [&]() {return  (float)pred_vec.size(); })); // give predator population size
-	attributes.push_back(attribute("prey vision distance", [&]() {return state.prey_see_range; })); // add things we change in this experiment series
+
+	//attributes.push_back(attribute("sample step", [&]() {return state.sample_step; })); // give how many samples we are into simulation
+
+	attributes.push_back(attribute("predation rate", [&]() {if (state.prey_vec.size() == 0) { return 0.0f; } else { return  (float)state.prey_eaten / state.prey_vec.size(); } })); // give predation rate
+	attributes.push_back(attribute("average prey eaten per predator", [&]() {if (state.pred_vec.size() == 0) { return 0.0f; } else { return (float)state.prey_eaten / state.pred_vec.size(); }})); // give average prey eaten per predator
+	attributes.push_back(attribute("prey population size", [&]() {return  (float)state.prey_vec.size(); })); // give prey population size
+	attributes.push_back(attribute("predator population size", [&]() {return  (float)state.pred_vec.size(); })); // give predator population size
+
+	/*attributes.push_back(attribute("prey vision distance", [&]() {return state.prey_see_range; })); // add things we change in this experiment series
 	attributes.push_back(attribute("predator territorial range", [&]() {return state.territorial_range; })); // add things we change in this experiment series
 	attributes.push_back(attribute("prey speed", [&]() {return state.prey_speed; }));
 	attributes.push_back(attribute("energy equivalence", [&]() {return state.energy_on; }));
 	attributes.push_back(attribute("energy for moving", [&]() {return state.energy_mov; }));
-	attributes.push_back(attribute("predator scared frames", [&]() {return state.init_scared; }));
+	attributes.push_back(attribute("predator scared frames", [&]() {return state.init_scared; })); */
 
 
 	std::vector<std::vector<float>> samples;
@@ -402,10 +398,10 @@ int main() {
 		}
 
 		// generate fresh prey and predators
-		prey_vec.clear();
-		pred_vec.clear();
-		for (int prey_gen = 0; prey_gen < state.init_prey; prey_gen++) prey_vec.insert(prey_vec.end(), std::shared_ptr<prey>(new prey()));
-		for (int pred_gen = 0; pred_gen < state.init_pred; pred_gen++) pred_vec.insert(pred_vec.end(), std::shared_ptr<predator>(new predator(state)));
+		state.prey_vec.clear();
+		state.pred_vec.clear();
+		for (int prey_gen = 0; prey_gen < state.init_prey; prey_gen++) state.prey_vec.insert(state.prey_vec.end(), std::shared_ptr<prey>(new prey()));
+		for (int pred_gen = 0; pred_gen < state.init_pred; pred_gen++) state.pred_vec.insert(state.pred_vec.end(), std::shared_ptr<predator>(new predator(state)));
 
 		// set state variables to start simualtion
 		state.sim_steps = 0;
@@ -415,6 +411,8 @@ int main() {
 		state.pre_sample_ticks = 0;
 		state.sample_step = 0;
 		state.sampling = false;
+
+		state.tracking = NULL;
 
 		if(!state.wants_auto_sampling) samples.clear();
 	};
@@ -434,16 +432,19 @@ int main() {
 			state.frame_steps += state.sim_step_per_frame;
 			while (state.sim_steps < state.frame_steps) {
 				state.sim_steps += 1;
-				std::list<std::shared_ptr<predator>> npred_vec; // create copy where I insert ones that are still alive to prevent previously erased iterator issues when erasing dead ones in pred_vec
-				for (auto simulater = pred_vec.begin(); simulater != pred_vec.end(); simulater++) {
-					if (!(*simulater)->step(prey_vec, pred_vec, simulater, state)) { // step returns true if predator dies
-						npred_vec.insert(npred_vec.end(), *simulater);
+				state.npred_vec.clear(); // create copy where I insert ones that are still alive to prevent previously erased iterator issues when erasing dead ones in state.pred_vec
+				for (auto simulater : state.pred_vec) {
+					if (!simulater->step(simulater, state)) { // step returns true if predator dies
+						state.npred_vec.push_back(simulater);
+					}
+					else {
+						if (simulater == state.tracking) state.tracking = NULL;
 					}
 				}
-				pred_vec = npred_vec;
+				swap(state.pred_vec, state.npred_vec);
 
-				for (std::shared_ptr<prey> simulater : prey_vec) {
-					simulater->step(pred_vec, state);
+				for (std::shared_ptr<prey> simulater : state.prey_vec) {
+					simulater->step(state);
 				}
 
 				if (!state.wants_sampling && !state.wants_auto_sampling) continue; // i am not very proud of sampling logic but it's ugly bc 2 bools and more conditions and stuff and ew
@@ -517,15 +518,15 @@ int main() {
 
 		//RENDER
 
-		drawBG(shaderProgramBG, out_color);
+		drawBG(shaderProgram, colorLocation, bg_color, out_color);
 
 		// DRAW CREATURES
 
 		// generate vertex array for prey
 		int prey_corn = 8; // corners prey body should have
-		float* prey_vertices = new float[prey_vec.size() * 2 * prey_corn];
-		auto cur_prey = prey_vec.begin();
-		for (int oct = 0; oct < prey_vec.size(); oct++) { // generatation of vertices: iterate through prey and for each draw polygon centered at x,y
+		float* prey_vertices = new float[state.prey_vec.size() * 2 * prey_corn];
+		auto cur_prey = state.prey_vec.begin();
+		for (int oct = 0; oct < state.prey_vec.size(); oct++) { // generatation of vertices: iterate through prey and for each draw polygon centered at x,y
 			for (int i = 0; i < prey_corn; i++) {
 				prey_vertices[oct * 2 * prey_corn + i * 2] = (*cur_prey)->pos.first + state.prey_size * cos(2 * PI / prey_corn * i);
 				prey_vertices[oct * 2 * prey_corn + i * 2 + 1] = (*cur_prey)->pos.second + state.prey_size * sin(2 * PI / prey_corn * i);
@@ -534,8 +535,8 @@ int main() {
 		}
 
 		// generate index array for prey
-		unsigned int* prey_indices = new unsigned int[prey_vec.size() * 3 * (prey_corn - 2)];
-		for (int oct = 0; oct < prey_vec.size(); oct++) { // generation of indices: loop through polygons and for each connect first vertex to all pairs of consecutive vertices afterwards to form shape by triangles.
+		unsigned int* prey_indices = new unsigned int[state.prey_vec.size() * 3 * (prey_corn - 2)];
+		for (int oct = 0; oct < state.prey_vec.size(); oct++) { // generation of indices: loop through polygons and for each connect first vertex to all pairs of consecutive vertices afterwards to form shape by triangles.
 			for (int lower = 1; lower < prey_corn - 1; lower++) {
 				prey_indices[oct * 3 * (prey_corn - 2) + (lower - 1) * 3] = oct * prey_corn;
 				prey_indices[oct * 3 * (prey_corn - 2) + (lower - 1) * 3 + 1] = oct * prey_corn + lower;
@@ -545,9 +546,9 @@ int main() {
 
 		// generate vertex and index array for predator the same way as for prey ==> TODO: make lambda and only write code once
 		int pred_corn = 6;
-		float* pred_vertices = new float[pred_vec.size() * 2 * pred_corn];
-		auto cur_pred = pred_vec.begin();
-		for (int hex = 0; hex < pred_vec.size(); hex++) {
+		float* pred_vertices = new float[state.pred_vec.size() * 2 * pred_corn];
+		auto cur_pred = state.pred_vec.begin();
+		for (int hex = 0; hex < state.pred_vec.size(); hex++) {
 			for (int i = 0; i < pred_corn; i++) {
 				pred_vertices[hex * 2 * pred_corn + i * 2] = (*cur_pred)->pos.first + state.pred_size * cos(2 * PI / pred_corn * i);
 				pred_vertices[hex * 2 * pred_corn + i * 2 + 1] = (*cur_pred)->pos.second + state.pred_size * sin(2 * PI / pred_corn * i);
@@ -555,8 +556,8 @@ int main() {
 			cur_pred++;
 		}
 
-		unsigned int* pred_indices = new unsigned int[pred_vec.size() * 3 * (pred_corn - 2)];
-		for (int hex = 0; hex < pred_vec.size(); hex++) {
+		unsigned int* pred_indices = new unsigned int[state.pred_vec.size() * 3 * (pred_corn - 2)];
+		for (int hex = 0; hex < state.pred_vec.size(); hex++) {
 			for (int lower = 1; lower < pred_corn - 1; lower++) {
 				pred_indices[hex * 3 * (pred_corn - 2) + (lower - 1) * 3] = hex * pred_corn;
 				pred_indices[hex * 3 * (pred_corn - 2) + (lower - 1) * 3 + 1] = hex * pred_corn + lower;
@@ -581,10 +582,10 @@ int main() {
 		glBindVertexArray(prey_VAO);
 
 		glBindBuffer(GL_ARRAY_BUFFER, prey_VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * prey_corn * prey_vec.size(), prey_vertices, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * prey_corn * state.prey_vec.size(), prey_vertices, GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prey_EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(float) * 3 * (prey_corn - 2) * prey_vec.size(), prey_indices, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(float) * 3 * (prey_corn - 2) * state.prey_vec.size(), prey_indices, GL_STATIC_DRAW);
 
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
@@ -592,24 +593,26 @@ int main() {
 		glBindVertexArray(pred_VAO);
 
 		glBindBuffer(GL_ARRAY_BUFFER, pred_VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * pred_corn * pred_vec.size(), pred_vertices, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 2 * pred_corn * state.pred_vec.size(), pred_vertices, GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pred_EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(float) * 3 * (pred_corn - 2) * pred_vec.size(), pred_indices, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(float) * 3 * (pred_corn - 2) * state.pred_vec.size(), pred_indices, GL_STATIC_DRAW);
 
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
 
 		// render out vertex array using respective shader program and element buffer
-		glUseProgram(prey_shaderProgram);
+		glUseProgram(shaderProgram);
+		glUniform4f(colorLocation, prey_color[0], prey_color[1], prey_color[2], prey_color[3]);
 		glBindVertexArray(prey_VAO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prey_EBO);
-		glDrawElements(GL_TRIANGLES, 3 * (prey_corn - 2) * prey_vec.size(), GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, 3 * (prey_corn - 2) * state.prey_vec.size(), GL_UNSIGNED_INT, 0);
 
-		glUseProgram(pred_shaderProgram);
+		glUseProgram(shaderProgram);
+		glUniform4f(colorLocation, pred_color[0], pred_color[1], pred_color[2], pred_color[3]);
 		glBindVertexArray(pred_VAO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pred_EBO);
-		glDrawElements(GL_TRIANGLES, 3 * (pred_corn - 2) * pred_vec.size(), GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, 3 * (pred_corn - 2) * state.pred_vec.size(), GL_UNSIGNED_INT, 0);
 
 		// delete buffers and arrays as they will be created again next frame and no longer needed
 		glDeleteBuffers(1, &prey_VBO);
@@ -623,6 +626,11 @@ int main() {
 		glDeleteVertexArrays(1, &pred_VAO);
 		delete[] pred_vertices;
 		delete[] pred_indices;
+
+		if (state.tracking != NULL) {
+			drawCircle(shaderProgram, colorLocation, state.tracking->pos.first, state.tracking->pos.second, state.pred_see_range, range_color);
+			drawCircle(shaderProgram, colorLocation, state.tracking->pos.first, state.tracking->pos.second, state.territorial_range, territory_color);
+		}
 
 		// Info window
 		ImGui::SetNextWindowSize(ImVec2(300.f, 0.f), ImGuiCond_FirstUseEver); // make sure window is not very narrow on first startup
@@ -646,13 +654,16 @@ int main() {
 		ImGui::ColorEdit4("Prey color", prey_color);
 		ImGui::ColorEdit4("Border color", out_color);
 		ImGui::ColorEdit4("Background color", bg_color);
+		ImGui::ColorEdit4("Range color", range_color);
+		ImGui::ColorEdit4("Territory color", territory_color);
 
 		ImGui::SliderFloat("Prey size", &state.prey_size, 0.0f, 0.1f);
 		ImGui::SliderFloat("Predator size", &state.pred_size, 0.0f, 0.1f);
 
-		ImGui::Text("Hello there adventurer!");
-		// Checkbox that appears in the window
-		ImGui::Checkbox("Draw Triangle", &drawTriangle);
+		float lzoom = state.zoom[2];
+		ImGui::SliderFloat("Zoom", &state.zoom[2], 0.0f, 2.0f);
+		if (state.zoom[2] != lzoom) glUniform3f(zoomLocation, state.zoom[0], state.zoom[1], state.zoom[2]);
+
 		// Ends the window
 		ImGui::End();
 
@@ -671,12 +682,12 @@ int main() {
 
 			ImGui::Text("");
 
-			ImGui::SliderFloat("Prey speed", &state.prey_speed, 0.0f, 1.0f);
+			ImGui::SliderFloat("Prey speed", &state.prey_speed, 0.0f, 0.1f);
 			ImGui::SliderFloat("Prey vision range", &state.prey_see_range, 0.0f, 1.0f);
 
 			ImGui::Text("");
 
-			ImGui::SliderFloat("Predator speed", &state.pred_speed, 0.0f, 1.0f);
+			ImGui::SliderFloat("Predator speed", &state.pred_speed, 0.0f, 0.1f);
 			ImGui::SliderFloat("Predator vision range", &state.pred_see_range, 0.0f, 1.0f);
 			ImGui::SliderFloat("Predator idle speed %", &state.idle_slow, 0.0f, 1.0f);
 			ImGui::SliderFloat("Predator idle direction change", &state.idle_dir_c, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
@@ -695,15 +706,28 @@ int main() {
 			float o_sim_step_per_frame = state.sim_step_per_frame;
 			ImGui::SliderFloat("Simulation steps per frame", &state.sim_step_per_frame, 0.0f, 2000.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
 			if (o_sim_step_per_frame != state.sim_step_per_frame) {
-				state.sim_steps = 0; state.frame_steps = 0;
+				state.sim_steps = 0; state.frame_steps = 1e-10;
 			}
+
+			ImGui::SliderFloat("Delta time per frame", &state.dt, 0.0f, 2.0f, "%.3f", ImGuiSliderFlags_Logarithmic);
 
 			ImGui::End();
 		}
 
-		sendUniform();
-
 		ImGui::Begin("Results");
+
+		if (state.tracking != NULL) {
+			ImGui::Text("Tracking predator energy: ");
+			float progress = (state.tracking->energy/(2*state.energy_on)); // Progress value between 0.0f and 1.0f
+			ImGui::ProgressBar(progress, ImVec2(0.0f, 100.0f));
+			ImGui::Text("Tracking predator territorial: ");
+			progress = (state.tracking->scared_frames/(state.init_scared)); // Progress value between 0.0f and 1.0f
+
+			ImU32 bar_color = ImColor(0x46, 0x12, 0x57, 255); // Red color for the progress bar
+			ImGui::PushStyleColor(ImGuiCol_PlotHistogram, bar_color);
+			ImGui::ProgressBar(progress , ImVec2(0.0f, 100.0f), "");
+			ImGui::PopStyleColor();
+		}
 
 		ImGui::Checkbox("Sample", &state.wants_sampling);
 		ImGui::Checkbox("Auto-Sample", &state.wants_auto_sampling);
@@ -756,9 +780,7 @@ int main() {
 	ImGui::DestroyContext();
 
 	// Delete all the objects we've created
-	glDeleteProgram(prey_shaderProgram);
-	glDeleteProgram(pred_shaderProgram);
-	glDeleteProgram(shaderProgramBG);
+	glDeleteProgram(shaderProgram);
 	// Delete window before ending the program
 	glfwDestroyWindow(window);
 	// Terminate GLFW before ending the program

@@ -3,6 +3,11 @@
 
 #include <string>
 #include <functional>
+#include <vector>
+#include <memory>
+
+struct prey;
+struct predator;
 
 struct State {
 	// state constants
@@ -10,6 +15,7 @@ struct State {
 	bool simulating;
 	float sim_step_per_frame;
 	double sim_steps, frame_steps;
+	float dt;
 
 	// prey constants
 	float prey_size;
@@ -26,7 +32,7 @@ struct State {
 	int init_scared;
 	// eating always gives 1 energy
 
-	//tracking constants
+	//sampling constants
 	int pre_sample_ticks;
 	int sample_wait;
 	int sample_interval;
@@ -38,6 +44,17 @@ struct State {
 	bool sample_done;
 	int tick;
 	int prey_eaten;
+
+	// simulation variables
+	std::vector<std::shared_ptr<prey>> prey_vec;
+	std::vector<std::shared_ptr<predator>> pred_vec;
+	std::vector<std::shared_ptr<predator>> npred_vec;
+
+	// tracking variables
+	std::shared_ptr<predator> tracking;
+
+	// visual variables
+	float* zoom;
 };
 
 struct attribute {

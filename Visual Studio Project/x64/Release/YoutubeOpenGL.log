@@ -1,73 +1,28 @@
 ﻿  Main.cpp
-C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(110,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(241,29): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(242,32): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(246,29): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(247,32): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(248,27): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(249,29): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(251,29): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(252,35): warning C4305: '=': truncation from 'double' to 'float'
-C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(607,89): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(612,89): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(753,27): warning C4244: 'return': conversion from 'int' to '_Rx', possible loss of data
-          with
-          [
-              _Rx=float
-          ]
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(919): message : see reference to function template instantiation '_Rx std::_Invoker_ret<_Rx,false>::_Call<_Callable&,>(_Fx) noexcept(false)' being compiled
-          with
-          [
-              _Rx=float,
-              _Callable=main::<lambda_faeb5685b2ca62d3b9c5023ccce6ec91>,
-              _Fx=main::<lambda_faeb5685b2ca62d3b9c5023ccce6ec91> &
-          ]
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(920): message : see reference to function template instantiation '_Rx std::_Invoker_ret<_Rx,false>::_Call<_Callable&,>(_Fx) noexcept(false)' being compiled
-          with
-          [
-              _Rx=float,
-              _Callable=main::<lambda_faeb5685b2ca62d3b9c5023ccce6ec91>,
-              _Fx=main::<lambda_faeb5685b2ca62d3b9c5023ccce6ec91> &
-          ]
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(919): message : while compiling class template member function '_Rx std::_Func_impl_no_alloc<main::<lambda_faeb5685b2ca62d3b9c5023ccce6ec91>,_Rx>::_Do_call(void)'
-          with
-          [
-              _Rx=float
-          ]
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(813): message : see reference to class template instantiation 'std::_Func_impl_no_alloc<main::<lambda_faeb5685b2ca62d3b9c5023ccce6ec91>,_Ret>' being compiled
-          with
-          [
-              _Ret=float
-          ]
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(1010): message : see reference to variable template 'const bool _Is_large<std::_Func_impl_no_alloc<<lambda_faeb5685b2ca62d3b9c5023ccce6ec91>,float> >' being compiled
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(1143): message : see reference to function template instantiation 'void std::_Func_class<_Ret>::_Reset<main::<lambda_faeb5685b2ca62d3b9c5023ccce6ec91>>(_Fx &&)' being compiled
-          with
-          [
-              _Ret=float,
-              _Fx=main::<lambda_faeb5685b2ca62d3b9c5023ccce6ec91>
-          ]
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\functional(1143): message : see reference to function template instantiation 'void std::_Func_class<_Ret>::_Reset<main::<lambda_faeb5685b2ca62d3b9c5023ccce6ec91>>(_Fx &&)' being compiled
-          with
-          [
-              _Ret=float,
-              _Fx=main::<lambda_faeb5685b2ca62d3b9c5023ccce6ec91>
-          ]
-C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(385): message : see reference to function template instantiation 'std::function<float (void)>::function<main::<lambda_faeb5685b2ca62d3b9c5023ccce6ec91>,0>(_Fx)' being compiled
-          with
-          [
-              _Fx=main::<lambda_faeb5685b2ca62d3b9c5023ccce6ec91>
-          ]
-C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(385): message : see reference to function template instantiation 'std::function<float (void)>::function<main::<lambda_faeb5685b2ca62d3b9c5023ccce6ec91>,0>(_Fx)' being compiled
-          with
-          [
-              _Fx=main::<lambda_faeb5685b2ca62d3b9c5023ccce6ec91>
-          ]
-  animals.cpp
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\animals.h(13,15): warning C4099: 'predator': type name first seen using 'struct' now seen using 'class'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\state.h(10): message : see declaration of 'predator'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\animals.h(15,12): warning C4099: 'prey': type name first seen using 'struct' now seen using 'class'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\animals.h(15): message : see declaration of 'prey'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\animals.h(22,16): warning C4099: 'predator': type name first seen using 'struct' now seen using 'class'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\animals.h(22): message : see declaration of 'predator'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(111,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(222,20): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(226,29): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(227,32): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(231,29): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(232,32): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(233,27): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(234,29): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(236,29): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(237,35): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(609,95): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(615,95): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+C:\Users\linus\CLionProjects\ee\Visual Studio Project\Main.cpp(724,45): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 LINK : warning LNK4098: defaultlib 'MSVCRTD' conflicts with use of other libs; use /NODEFAULTLIB:library
   Generating code
-  60 of 2751 functions ( 2.2%) were compiled, the rest were copied from previous compilation.
-    38 functions were new in current compilation
-    150 functions had inline decision re-evaluated but remain unchanged
+  1 of 2637 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    26 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
 glfw3.lib(context.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3.lib(context.obj)' or at 'C:\Users\linus\CLionProjects\ee\Visual Studio Project\x64\Release\glfw.pdb'; linking object as if no debug info
 glfw3.lib(init.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3.lib(init.obj)' or at 'C:\Users\linus\CLionProjects\ee\Visual Studio Project\x64\Release\glfw.pdb'; linking object as if no debug info

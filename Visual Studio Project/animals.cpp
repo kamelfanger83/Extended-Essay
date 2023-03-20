@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <memory>
-#include <list>
 
 #include <iostream>
 
@@ -13,13 +12,13 @@ prey::prey() { // generate prey evenly within game circle
 	pos = polartocart(phi, r);
 }
 
-void prey::step(std::list<std::shared_ptr<predator>>& pred_vec, State& state) {
-	if (pred_vec.size() == 0) return;
+void prey::step(State& state) {
+	if (state.pred_vec.size() == 0) return;
 
 	float min_dst_sq = 10; //distances within field cannot exceed sqrt(2)*2 (diagonals) so square has to be <= 8
-	auto nearest = pred_vec.begin();
+	auto nearest = state.pred_vec.begin();
 
-	for (auto cand_nearest = pred_vec.begin(); cand_nearest != pred_vec.end(); cand_nearest++) { //iterate through prey to find one that is closest (could be done more efficiently by using datastructure trees optimised for NN but this is likely not the bottleneck in my simulation)
+	for (auto cand_nearest = state.pred_vec.begin(); cand_nearest != state.pred_vec.end(); cand_nearest++) { //iterate through prey to find one that is closest (could be done more efficiently by using datastructure trees optimised for NN but this is likely not the bottleneck in my simulation)
 		vec2f dif = (*cand_nearest)->pos - pos;
 		if (sdlen(dif) < min_dst_sq) {
 			min_dst_sq = sdlen(dif);
@@ -29,7 +28,7 @@ void prey::step(std::list<std::shared_ptr<predator>>& pred_vec, State& state) {
 
 	vec2f dvec = (*nearest)->pos - pos;
 
-	if (sdlen(pos + norm(dvec, state.prey_speed)) > 1) {
+	if (sdlen(pos + norm(dvec, state.prey_speed)*state.dt) > 1) {
 		std::pair<float, float> per_vec = { pos.second, -pos.first }; // make vector perpendicular to position vector to determine in which direction to flee
 
 		if (per_vec * dvec > 0) { // calculate dot product to determine whether per_vec and direction it wants to flee is in the same direction
@@ -44,7 +43,7 @@ void prey::step(std::list<std::shared_ptr<predator>>& pred_vec, State& state) {
 
 	else if (len(dvec) < state.prey_see_range) { // move away from nearest predator, distance normalized to speed
 		dvec = norm(dvec, state.prey_speed);
-		pos = pos - dvec;
+		pos = pos - dvec * state.dt;
 		if (sdlen(pos) > 1) pos = norm(pos, 1);
 	}
 }
@@ -64,75 +63,72 @@ predator::predator(vec2f pos, State state) : pos(pos) {
 	scared_frames = 0;
 }
 
-bool predator::step(std::list<std::shared_ptr<prey>>& prey_vec, std::list<std::shared_ptr<predator>>& pred_vec, std::list<std::shared_ptr<predator>>::iterator self, State& state) {
+bool predator::step(std::shared_ptr<predator> self, State& state) {
 	if (energy < 0) return true; // means this creature dies in this frame
 	if (energy >  2 * state.energy_on) {
-		vec2f childpos = pos + polartocart((float)rand() / RAND_MAX * 2 * PI, 5 * state.pred_speed); // spawn child a little aways so they are not practically the same entity
-		pred_vec.insert(pred_vec.end(), std::shared_ptr<predator>(new predator(childpos, state)));
+		vec2f childpos = pos + polartocart((float)rand() / RAND_MAX * 2 * PI, 2 * state.pred_speed); // spawn child a little aways so they are not practically the same entity
+		state.npred_vec.push_back(std::shared_ptr<predator>(new predator(childpos, state)));
 		energy -= state.energy_on;
 	}
 
 	auto move_idle = [&]() { // helper lambda because two places need to move idle
-		energy -= state.energy_mov * state.idle_slow * state.idle_slow; //subtract a reduced amount of energy (~square of v bc E = 1/2 m v^2) 
+		energy -= state.energy_mov * state.idle_slow * state.idle_slow * state.dt; //subtract a reduced amount of energy (~square of v bc E = 1/2 m v^2) 
 		if (phi_idle > 2 * PI) phi_idle = (float)rand() / RAND_MAX * 2 * PI;
-		phi_idle += (float)rand() / RAND_MAX * 2 * state.idle_dir_c - state.idle_dir_c;
+		phi_idle += ((float)rand() / RAND_MAX * 2 * state.idle_dir_c - state.idle_dir_c) * state.dt;
 		if (phi_idle < 0) phi_idle += 2 * PI;
 		if (phi_idle > 2 * PI) phi_idle -= 2 * PI;
-		pos += polartocart(phi_idle, state.pred_speed * state.idle_slow);
+		pos += polartocart(phi_idle, state.pred_speed * state.idle_slow) * state.dt;
 		if (sdlen(pos) > 1) {
 			pos = norm(pos, 1);
 			phi_idle = (float)rand() / RAND_MAX * 2 * PI;
 		}
 	};
 
-	if (prey_vec.size() == 0) {
-		move_idle();
-		return false;
-	}
-
-	if (pred_vec.size() > 1) {
+	if (state.pred_vec.size() > 1) {
 		float pred_min_dst_sq = 10; //distances within field cannot exceed sqrt(2)*2 (diagonals) so square has to be <= 8
-		auto pred_nearest = pred_vec.begin();
+		auto pred_nearest = state.pred_vec[0];
 
-		for (auto cand_nearest = pred_vec.begin(); cand_nearest != pred_vec.end(); cand_nearest++) { //iterate through prey to find one that is closest (could be done more efficiently by using datastructure trees optimised for NN but this is likely not the bottleneck in my simulation)
+		for (auto cand_nearest : state.pred_vec) { //iterate through prey to find one that is closest (could be done more efficiently by using datastructure trees optimised for NN but this is likely not the bottleneck in my simulation)
 			if (cand_nearest == self) continue;
-			vec2f dif = (*cand_nearest)->pos - pos;
+			vec2f dif = cand_nearest->pos - pos;
 			if (sdlen(dif) < pred_min_dst_sq) {
 				pred_min_dst_sq = sdlen(dif);
 				pred_nearest = cand_nearest;
 			}
 		}
 
-		vec2f dvec = (*pred_nearest)->pos - pos;
+		vec2f dvec = pred_nearest->pos - pos;
 
 		if (len(dvec) < state.territorial_range) {
-			energy -= state.energy_mov;
+			energy -= state.energy_mov * state.dt;
 			dvec = norm(dvec, state.pred_speed);
-			pos = pos - dvec;
 			phi_idle = 3 * PI; // set idle direction as unitialized again so it gets regenerated next time
 			scared_frames = state.init_scared;
 			scared_step = dvec;
 
-			(*pred_nearest)->scared_frames = state.init_scared; // set other predator also scared because my step would go out of his scared range otherwise
-			(*pred_nearest)->scared_step = dvec * -1;
-			(*pred_nearest)->phi_idle = 3 * PI;
-
-			return false;
+			pred_nearest->scared_frames = state.init_scared; // set other predator also scared because my step would go out of his scared range otherwise
+			pred_nearest->scared_step = dvec * -1;
+			pred_nearest->phi_idle = 3 * PI;
 		}
 	}
 
 	if (scared_frames > 0) {
-		energy -= state.energy_mov;
-		scared_frames--;
-		pos = pos - scared_step;
+		energy -= state.energy_mov * state.dt;
+		scared_frames -= state.dt;
+		pos = pos - scared_step * state.dt;
 		if (sdlen(pos) > 1) pos = norm(pos, 1);
 		return false;
 	}
 
-	float prey_min_dst_sq = 10; //distances within field cannot exceed sqrt(2)*2 (diagonals) so square has to be <= 8
-	auto prey_nearest = prey_vec.begin();
+	if (state.prey_vec.size() == 0) {
+		move_idle();
+		return false;
+	}
 
-	for (auto cand_nearest = prey_vec.begin(); cand_nearest != prey_vec.end(); cand_nearest++) { //iterate through prey to find one that is closest (could be done more efficiently by using datastructure trees optimised for NN but this is likely not the bottleneck in my simulation)
+	float prey_min_dst_sq = 10; //distances within field cannot exceed sqrt(2)*2 (diagonals) so square has to be <= 8
+	auto prey_nearest = state.prey_vec.begin();
+
+	for (auto cand_nearest = state.prey_vec.begin(); cand_nearest != state.prey_vec.end(); cand_nearest++) { //iterate through prey to find one that is closest (could be done more efficiently by using datastructure trees optimised for NN but this is likely not the bottleneck in my simulation)
 		vec2f dif = (*cand_nearest)->pos - pos;
 		if (sdlen(dif) < prey_min_dst_sq) {
 			prey_min_dst_sq = sdlen(dif);
@@ -149,9 +145,9 @@ bool predator::step(std::list<std::shared_ptr<prey>>& prey_vec, std::list<std::s
 	}
 
 	else if (len(dvec) < state.pred_see_range) { // move in direction of nearest prey, distance normalized to speed
-		energy -= state.energy_mov;
+		energy -= state.energy_mov * state.dt;
 		dvec = norm(dvec, state.pred_speed);
-		pos = pos + dvec;
+		pos = pos + dvec * state.dt;
 		phi_idle = 3 * PI; // set idle direction as unitialized again so it gets regenerated next time
 	}
 

@@ -2,10 +2,11 @@
  
 #include <utility>
 
-
 #define PI 3.1415926538979323f
 
 #define vec2f std::pair<float, float>
+
+const double dinf = 1e100;
 
 float clamp(float, float, float);
 
